@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>QRStandee — Business QR Generator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827}
+header{background:#111827;color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-size:21px;font-weight:800}.logo span{color:#60a5fa}.sub{font-size:12px;color:#9ca3af}
+.app{max-width:1200px;margin:auto;padding:18px;display:grid;grid-template-columns:420px 1fr;gap:18px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;box-shadow:0 5px 20px #00000008}
+h2{font-size:17px;margin:0 0 15px}h3{font-size:14px;margin:20px 0 10px}
+label{display:block;font-size:12px;font-weight:700;margin:11px 0 6px;color:#374151}
+input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:9px;padding:10px 11px;font:inherit;background:#fff}
+textarea{resize:vertical;min-height:70px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.templates{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.template{border:1px solid #d1d5db;border-radius:9px;background:#fff;padding:9px 4px;font-size:11px;cursor:pointer}.template.active{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.profile-preview{display:none}.profile-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.profile-actions div{padding:10px;border:1px solid #e5e7eb;border-radius:9px;font-size:12px;font-weight:800}.dynamic-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px}.dynamic-status{font-size:12px;font-weight:900;margin-bottom:9px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-right:6px}.slug-row{display:flex;align-items:center;background:#fff;border:1px solid #d1d5db;border-radius:9px;overflow:hidden}.slug-row span{font-size:11px;color:#64748b;padding-left:9px;white-space:nowrap}.slug-row input{border:0;border-radius:0;padding-left:5px}.dynamic-url{margin-top:8px;background:#111827;color:#fff;border-radius:8px;padding:9px;font-size:11px;word-break:break-all}.dash-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.mini-stat{border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px;text-align:center;min-width:70px}.mini-stat b{display:block;font-size:18px}.mini-stat span{font-size:9px;color:#6b7280}.local-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.local-stat{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px}.local-stat b{display:block;font-size:15px}.local-stat span{font-size:9px;color:#6b7280}.type{border:1px solid #d1d5db;background:#fff;padding:9px 5px;border-radius:9px;font-size:11px;cursor:pointer}.type.active{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}button{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:#2563eb;color:#fff}.dark{background:#111827;color:#fff}.light{background:#eef2f7;color:#111827}
+.preview-wrap{display:flex;justify-content:center;align-items:flex-start;min-height:650px;background:repeating-conic-gradient(#f8fafc 0 25%,#f1f5f9 0 50%) 50%/22px 22px;padding:28px;border-radius:16px}
+.standee{width:420px;min-height:594px;background:#fff;border:1px solid #ddd;border-radius:3px;box-shadow:0 12px 35px #0002;padding:28px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.logoBox{width:62px;height:62px;border-radius:50%;display:none;overflow:hidden;margin-bottom:10px}.logoBox img{width:100%;height:100%;object-fit:cover}
+.biz{font-size:28px;font-weight:900;line-height:1.1}.tag{font-size:14px;color:#6b7280;margin:8px 0 17px}
+.qrbox{padding:13px;background:#fff;border:1px solid #e5e7eb;border-radius:12px}.qrbox canvas,.qrbox img{display:block;width:235px;height:235px}
+.cta{margin-top:17px;font-size:21px;font-weight:900}.details{font-size:12px;color:#4b5563;line-height:1.5;margin-top:10px;white-space:pre-line}
+.badge{margin-top:auto;background:#f3f4f6;padding:7px 11px;border-radius:999px;font-size:10px;color:#6b7280}
+.note{font-size:11px;color:#6b7280;line-height:1.45;margin-top:8px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.preview-wrap{min-height:auto}.standee{width:min(100%,420px)}}@media print{
+body{background:#fff}.app,header{display:none}.preview-wrap{display:block;padding:0;background:#fff}.standee{box-shadow:none;border:0;margin:0 auto}
+}
+</style>
+
+<style>
+.local-manager{margin-top:14px;border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fafafa}
+.local-manager .lm-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.local-manager .lm-list{display:grid;gap:7px;margin-top:9px}
+.local-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px;background:#fff;border:1px solid #e5e7eb;border-radius:9px}
+.local-item .meta{min-width:0}.local-item b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.local-item small{color:#6b7280}
+.local-actions{display:flex;gap:5px;flex-wrap:wrap}.local-actions button{padding:7px 9px;font-size:11px}
+.api-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#9ca3af;margin-right:5px}
+</style>
+</head>
+<body>
+<header><div><div class="logo">QR<span>Standee</span></div><div class="sub">Business QR & print-ready standee generator</div></div><button class="light" onclick="window.print()">🖨 Print / Save PDF</button></header>
+
+<main class="app">
+<section class="card">
+<div class="dash-top"><div><h2 style="margin-bottom:3px">Business QR Generator</h2><div class="note">Local-first. No account or database required.</div></div><div class="mini-stat"><b id="qrCount">0</b><span>Saved QR</span></div></div>
+
+<h3>Dynamic QR</h3>
+<div class="dynamic-box">
+  <div class="dynamic-status"><span class="dot"></span> Dynamic QR ready</div>
+  <label>QR slug</label>
+  <div class="slug-row"><span>qrstandee.app/</span><input id="slug" value="my-business" oninput="updateDynamicUrl()"></div>
+  <div class="dynamic-url" id="dynamicUrl">https://qrstandee.app/my-business</div>
+<div class="btns"><button class="light" onclick="copyDynamicUrl()">📋 Copy URL</button><button class="primary" onclick="setDynamicQR()">🔗 Use Dynamic URL</button></div>
+  <div class="note">Demo mode: this creates the permanent URL structure. Connect a Cloudflare Worker + D1 backend to make redirects and analytics live.</div>
+</div>
+
+<h3>Business Profile</h3>
+<div class="row">
+<div><label>Primary action</label><select id="primaryAction" onchange="syncAction()">
+<option value="upi">Pay by UPI</option><option value="whatsapp">WhatsApp</option><option value="website">Website</option><option value="maps">Directions</option><option value="review">Google Review</option><option value="phone">Call Now</option></select></div>
+<div><label>Profile style</label><select id="profileStyle" onchange="render()"><option value="clean">Clean</option><option value="bold">Bold</option><option value="minimal">Minimal</option></select></div>
+</div>
+<div class="row">
+<div><label>Business category</label><input id="category" placeholder="Restaurant, Clinic, Salon..." oninput="render()"></div>
+<div><label>GST / extra ID</label><input id="extra" placeholder="Optional" oninput="render()"></div>
+</div>
+
+<h3>1. QR Type</h3>
+<div class="types" id="types"></div>
+
+<h3>2. Business Details</h3>
+<label>Business name</label><input id="name" value="Your Business Name" oninput="render()">
+<label>Tagline</label><input id="tag" value="Scan to connect with us" oninput="render()">
+<label>QR destination</label><input id="value" placeholder="Enter URL, phone, UPI ID, WhatsApp number..." oninput="render()">
+
+<div class="row">
+<div><label>Phone</label><input id="phone" placeholder="+91 98765 43210" oninput="render()"></div>
+<div><label>Website</label><input id="website" placeholder="example.com" oninput="render()"></div>
+</div>
+<label>Address</label><textarea id="address" placeholder="Business address" oninput="render()"></textarea>
+
+<h3>3. Template</h3>
+<div class="templates" id="templates"></div>
+
+<h3>3. Standee Size</h3>
+<div class="row"><div><label>Paper / Standee</label><select id="size" onchange="sizeChange()">
+<option value="a4">A4 — 210 × 297 mm</option>
+<option value="a3">A3 — 297 × 420 mm</option>
+<option value="a2">A2 — 420 × 594 mm</option>
+<option value="a1">A1 — 594 × 841 mm</option>
+<option value="12x18">12 × 18 inch</option>
+<option value="18x24">18 × 24 inch</option>
+<option value="24x36">24 × 36 inch</option>
+</select></div>
+<div><label>Orientation</label><select id="orientation" onchange="orientationChange()"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></div></div>
+
+<h3>4. QR & Design</h3>
+<div class="row">
+<div><label>QR color</label><input type="color" id="qrColor" value="#111827" oninput="render()"></div>
+<div><label>Accent</label><input type="color" id="accent" value="#2563eb" oninput="render()"></div>
+</div>
+<div class="row">
+<div><label>QR shape</label><select id="qrShape" onchange="render()"><option value="square">Square</option><option value="round">Rounded</option><option value="dots">Dots</option></select></div>
+<div><label>QR size</label><select id="qrSize" onchange="render()"><option value="200">Small</option><option value="235" selected>Medium</option><option value="270">Large</option></select></div>
+</div>
+<label>Call-to-action</label><input id="cta" value="SCAN TO PAY" oninput="render()">
+<label>Logo (optional)</label><input id="logo" type="file" accept="image/*" onchange="logoChange(event)">
+
+<div class="btns">
+<button class="primary" onclick="downloadPNG()">⬇ Download PNG</button>
+<button class="dark" onclick="downloadSVG()">⬇ Download SVG</button>
+<button class="light" onclick="window.print()">📄 Print / PDF</button>
+<button class="light" onclick="shareBusiness()">📤 Share</button>
+<button class="light" onclick="resetApp()">↻ Reset</button>
+<button class="light" onclick="downloadProfile()">🌐 Export Business Profile</button>
+</div>
+
+<div class="local-manager">
+  <div class="lm-head"><div><b>Local QR Library</b><div class="note">Works without database. Data stays in this browser.</div></div>
+    <div id="apiState"><span class="api-dot"></span>Local</div></div>
+  <div class="btns">
+    <button class="light" onclick="saveLocalQR()">💾 Save QR</button>
+    <button class="light" onclick="exportLocalData()">⬇ Backup JSON</button>
+    <button class="light" onclick="document.getElementById('importJson').click()">⬆ Restore JSON</button>
+    <input id="importJson" type="file" accept="application/json" hidden onchange="importLocalData(event)">
+  </div>
+  <div class="local-stats" id="localStats"></div>
+  <div id="localList" class="lm-list"></div>
+</div>
+<div class="note">QR is generated locally in your browser. No business data is uploaded by this page. For real-world printing, scan-test the exported QR before bulk printing.</div>
+</section>
+
+<section class="preview-wrap"><div class="standee" id="standee">
+<div class="logoBox" id="logoBox"><img id="logoImg"></div>
+<div class="biz" id="pName">Your Business Name</div>
+<div class="tag" id="pTag">Scan to connect with us</div>
+<div class="qrbox"><canvas id="qr"></canvas></div>
+<div class="cta" id="pCta">SCAN TO PAY</div>
+<div class="details" id="pDetails"></div>
+<div class="badge">Powered by QRStandee</div>
+</div></section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>\n<script>\n/* Standards-compliant QR generation via QRCode.js (MIT licensed), loaded from jsDelivr. */
+
+const TYPES=[
+["upi","💳 UPI Payment"],["whatsapp","💬 WhatsApp"],["website","🌐 Website"],
+["maps","📍 Google Maps"],["review","⭐ Google Review"],["phone","📞 Phone"],
+["instagram","📸 Instagram"],["facebook","ⓕ Facebook"],["youtube","▶ YouTube"],
+["wifi","📶 Wi-Fi"],["email","✉️ Email"],["vcard","👤 Contact"]
+];
+let type="upi", logoData="";
+const types=document.getElementById("types");
+TYPES.forEach(([id,label])=>{let b=document.createElement("button");b.className="type"+(id===type?" active":"");b.textContent=label;b.onclick=()=>{type=id;document.querySelectorAll(".type").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("value").placeholder=placeholder(id);render()};types.appendChild(b)});
+function placeholder(t){return {upi:"merchant@upi",whatsapp:"919876543210",website:"https://example.com",maps:"Google Maps URL",review:"Google Review URL",phone:"+919876543210",instagram:"https://instagram.com/username",facebook:"https://facebook.com/page",youtube:"https://youtube.com/@channel",wifi:"WIFI:T:WPA;S:Network;P:Password;;",email:"hello@example.com",vcard:"https://example.com/contact"}[t]||"Enter destination"}
+document.getElementById("value").placeholder=placeholder(type);
+
+function updateDynamicUrl(){
+ let s=(document.getElementById("slug").value||"my-business").toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+ document.getElementById("slug").value=s;
+ document.getElementById("dynamicUrl").textContent="https://qrstandee.app/"+(s||"my-business");
+}
+function payload(){
+ let v=document.getElementById("value").value.trim();
+ if(type==="upi") return v?`upi://pay?pa=${encodeURIComponent(v)}&pn=${encodeURIComponent(document.getElementById("name").value)}`:"upi://pay?pa=merchant@upi";
+ if(type==="whatsapp"){let n=v.replace(/\D/g,"");return n?`https://wa.me/${n}`:"https://wa.me/919876543210"}
+ if(type==="phone") return "tel:"+v.replace(/[^\d+]/g,"");
+ if(type==="email") return "mailto:"+v;
+ if(type==="website"||type==="instagram"||type==="facebook"||type==="youtube"||type==="maps"||type==="review") return v || "https://example.com";
+ return v || "https://example.com";
+}
+let qrInstance=null;
+let qrInstance=null;
+function drawQR(text,color){
+ const box=document.getElementById("qrbox"); // optional future hook
+ const c=document.getElementById("qr"),ctx=c.getContext("2d");
+ const size=Number(document.getElementById("qrSize").value);
+ c.width=c.height=size;ctx.clearRect(0,0,size,size);
+ const tmp=document.createElement("div");
+ tmp.style.position="fixed";tmp.style.left="-99999px";tmp.style.top="0";document.body.appendChild(tmp);
+ new QRCode(tmp,{text:text,width:size,height:size,colorDark:color,colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+ setTimeout(()=>{
+   const img=tmp.querySelector("img")||tmp.querySelector("canvas");
+   if(img)ctx.drawImage(img,0,0,size,size);
+   document.body.removeChild(tmp);
+ },0);
+}
+function render(){
+ document.getElementById("pName").textContent=document.getElementById("name").value||"Your Business Name";
+ document.getElementById("pTag").textContent=document.getElementById("category").value||document.getElementById("tag").value||"";
+ document.getElementById("pCta").textContent=document.getElementById("cta").value||"SCAN";
+ document.getElementById("pCta").style.color=document.getElementById("accent").value;
+ let d=[document.getElementById("phone").value,document.getElementById("website").value,document.getElementById("address").value].filter(Boolean).join("\n");
+ document.getElementById("pDetails").textContent=d;
+ drawQR(payload(),document.getElementById("qrColor").value);
+ document.getElementById("logoBox").style.display=logoData?"block":"none";
+ if(logoData)document.getElementById("logoImg").src=logoData;
+}
+function logoChange(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{logoData=r.result;render()};r.readAsDataURL(f)}
+const TEMPLATES=[
+ ["classic","Classic","SCAN TO PAY"],
+ ["restaurant","Restaurant","SCAN FOR MENU"],
+ ["review","Reviews","SCAN TO REVIEW"],
+ ["whatsapp","WhatsApp","CHAT WITH US"],
+ ["maps","Location","SCAN FOR DIRECTIONS"],
+ ["social","Social","FOLLOW US"]
+];
+let selectedTemplate="classic";
+const tbox=document.getElementById("templates");
+TEMPLATES.forEach(([id,label,cta])=>{
+ const b=document.createElement("button"); b.className="template"+(id===selectedTemplate?" active":""); b.textContent=label;
+ b.onclick=()=>{selectedTemplate=id;document.querySelectorAll(".template").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+ document.getElementById("cta").value=cta; applyTemplate(id);};
+ tbox.appendChild(b);
+});
+function applyTemplate(id){
+ const a=document.getElementById("accent");
+ const q=document.getElementById("qrColor");
+ const map={
+  classic:["#2563eb","#111827"],restaurant:["#b45309","#111827"],review:["#ca8a04","#111827"],
+  whatsapp:["#16a34a","#111827"],maps:["#dc2626","#111827"],social:["#7c3aed","#111827"]
+ };
+ [a.value,q.value]=map[id]||map.classic; render();
+}
+function orientationChange(){
+ const el=document.getElementById("standee");
+ if(document.getElementById("orientation").value==="landscape"){
+   const w=el.style.width,h=el.style.minHeight;el.style.width=h;el.style.minHeight=w;
+ } else sizeChange();
+ render();
+}
+function sizeChange(){
+ const map={a4:[210,297],a3:[297,420],a2:[420,594],a1:[594,841],"12x18":[304.8,457.2],"18x24":[457.2,609.6],"24x36":[609.6,914.4]};
+ let [w,h]=map[document.getElementById("size").value];let max=594;
+ let scale=Math.min(max/h,420/w);let el=document.getElementById("standee");el.style.width=(w*scale)+"px";el.style.minHeight=(h*scale)+"px";render();
+}
+function downloadPNG(){
+ const el=document.getElementById("standee"),r=el.getBoundingClientRect(),scale=3,c=document.createElement("canvas");c.width=r.width*scale;c.height=r.height*scale;
+ let x=c.getContext("2d");x.scale(scale,scale);x.fillStyle="#fff";x.fillRect(0,0,r.width,r.height);
+ /* Render a clean standalone print image by drawing key content. */
+ x.fillStyle="#111827";x.textAlign="center";x.font="900 28px Arial";x.fillText(document.getElementById("name").value||"Your Business Name",r.width/2,65);
+ x.fillStyle="#6b7280";x.font="14px Arial";x.fillText(document.getElementById("tag").value||"",r.width/2,91);
+ let q=document.getElementById("qr").querySelector("canvas")||document.getElementById("qr").querySelector("img");
+if(q)x.drawImage(q,r.width/2-117.5,115,235,235);
+ x.fillStyle=document.getElementById("accent").value;x.font="900 21px Arial";x.fillText(document.getElementById("cta").value||"SCAN",r.width/2,385);
+ x.fillStyle="#4b5563";x.font="12px Arial";let lines=[document.getElementById("phone").value,document.getElementById("website").value,document.getElementById("address").value].filter(Boolean).join("\n").split("\n");lines.forEach((l,i)=>x.fillText(l,r.width/2,410+i*18));
+ let a=document.createElement("a");a.download="qrstandee.png";a.href=c.toDataURL("image/png");a.click();
+}
+function downloadSVG(){
+ const c=document.getElementById("qr").querySelector("canvas"),data=c?c.toDataURL("image/png"):"",name=(document.getElementById("name").value||"Business").replace(/[^\w-]+/g,"_");
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 794 1123"><rect width="100%" height="100%" fill="white"/><text x="397" y="100" text-anchor="middle" font-family="Arial" font-size="42" font-weight="900">${esc(document.getElementById("name").value)}</text><text x="397" y="135" text-anchor="middle" font-family="Arial" font-size="18" fill="#6b7280">${esc(document.getElementById("tag").value)}</text><image href="${data}" x="247" y="175" width="300" height="300"/><text x="397" y="525" text-anchor="middle" font-family="Arial" font-size="28" font-weight="900" fill="${document.getElementById("accent").value}">${esc(document.getElementById("cta").value)}</text></svg>`;
+ let a=document.createElement("a");a.download=name+"_standee.svg";a.href="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);a.click();
+}
+function esc(s){return String(s||"").replace(/[&<>"]/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[x]))}
+function syncAction(){
+ const a=document.getElementById("primaryAction").value;
+ type=a;
+ document.querySelectorAll(".type").forEach(x=>x.classList.remove("active"));
+ const idx=TYPES.findIndex(x=>x[0]===a);
+ if(idx>=0) document.querySelectorAll(".type")[idx].classList.add("active");
+ document.getElementById("value").placeholder=placeholder(a);
+ render();
+}
+function copyDynamicUrl(){
+ const u=document.getElementById("dynamicUrl").textContent;
+ navigator.clipboard?.writeText(u).then(()=>alert("Dynamic URL copied."));
+}
+function setDynamicQR(){
+ document.getElementById("value").value=document.getElementById("dynamicUrl").textContent;
+ type="website";
+ document.querySelectorAll(".type").forEach(x=>x.classList.remove("active"));
+ const i=TYPES.findIndex(x=>x[0]==="website"); if(i>=0)document.querySelectorAll(".type")[i].classList.add("active");
+ render();
+}
+async function shareBusiness(){
+ const d=profileData(), url=document.getElementById("dynamicUrl").textContent;
+ const data={title:d.name||"Business QR",text:d.tag||"Visit our business",url};
+ try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(url);alert("Dynamic URL copied.")}}catch(e){}
+}
+function profileData(){
+ return {
+  name:document.getElementById("name").value.trim()||"Your Business",
+  tag:document.getElementById("tag").value.trim(),
+  category:document.getElementById("category").value.trim(),
+  phone:document.getElementById("phone").value.trim(),
+  website:document.getElementById("website").value.trim(),
+  address:document.getElementById("address").value.trim(),
+  extra:document.getElementById("extra").value.trim(),
+  destination:document.getElementById("value").value.trim()
+ };
+}
+function downloadProfile(){
+ const d=profileData(), esc2=esc;
+ const actionLabel={upi:"Pay by UPI",whatsapp:"Chat on WhatsApp",website:"Visit Website",maps:"Get Directions",review:"Leave a Review",phone:"Call Now"}[document.getElementById("primaryAction").value]||"Open";
+ let href=payload();
+ if(document.getElementById("primaryAction").value==="upi") href=href;
+ const logo=logoData?`<img class="logo" src="${logoData}" alt="Logo">`:"";
+ const page=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc2(d.name)}</title>
+ <style>body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827;display:grid;place-items:center;min-height:100vh;padding:20px}.card{width:min(420px,100%);background:white;border-radius:24px;padding:28px;box-shadow:0 20px 60px #0002;text-align:center}.logo{width:82px;height:82px;border-radius:50%;object-fit:cover;margin-bottom:12px}.name{font-size:29px;font-weight:900}.cat{color:#6b7280;margin:7px 0 20px}.main{display:block;text-decoration:none;background:#2563eb;color:white;padding:14px;border-radius:12px;font-weight:900;margin-bottom:10px}.info{text-align:left;border-top:1px solid #e5e7eb;margin-top:18px;padding-top:15px;font-size:13px;line-height:1.8}.brand{margin-top:22px;color:#9ca3af;font-size:11px}</style>
+<style>
+.local-manager{margin-top:14px;border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fafafa}
+.local-manager .lm-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.local-manager .lm-list{display:grid;gap:7px;margin-top:9px}
+.local-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px;background:#fff;border:1px solid #e5e7eb;border-radius:9px}
+.local-item .meta{min-width:0}.local-item b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.local-item small{color:#6b7280}
+.local-actions{display:flex;gap:5px;flex-wrap:wrap}.local-actions button{padding:7px 9px;font-size:11px}
+.api-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#9ca3af;margin-right:5px}
+</style>
+</head><body><main class="card">${logo}<div class="name">${esc2(d.name)}</div><div class="cat">${esc2(d.category||d.tag)}</div><a class="main" href="${esc2(href)}">${esc2(actionLabel)}</a><div class="info">${d.phone?`📞 ${esc2(d.phone)}<br>`:""}${d.website?`🌐 ${esc2(d.website)}<br>`:""}${d.address?`📍 ${esc2(d.address)}<br>`:""}${d.extra?`ID: ${esc2(d.extra)}`:""}</div><div class="brand">Business profile generated by QRStandee</div></main></body></html>`;
+ const blob=new Blob([page],{type:"text/html"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(d.name||"business").replace(/[^\w-]+/g,"_")+"_profile.html";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function resetApp(){location.reload()}
+updateDynamicUrl();
+// ---------------- Local-first storage + backend-ready API adapter ----------------
+const LOCAL_KEY="qrstandee.businesses.v1";
+const API_BASE = ""; // Set to your Worker origin, e.g. "https://api.example.com"
+
+function readLocal(){
+  try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||"[]")}catch(e){return []}
+}
+function writeLocal(rows){localStorage.setItem(LOCAL_KEY,JSON.stringify(rows));renderLocalList()}
+function currentRecord(){
+  const d=profileData();
+  return {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+    name:d.name, tag:d.tag, category:d.category, phone:d.phone, website:d.website,
+    address:d.address, extra:d.extra, destination:d.destination,
+    qrType:type, slug:(document.getElementById("slug").value||"my-business"),
+    primaryAction:document.getElementById("primaryAction").value,
+    size:document.getElementById("size").value,
+    orientation:document.getElementById("orientation").value,
+    qrColor:document.getElementById("qrColor").value,
+    accent:document.getElementById("accent").value,
+    cta:document.getElementById("cta").value,
+    logo:logoData||""
+  };
+}
+function saveLocalQR(){
+  const r=currentRecord(), rows=readLocal();
+  const existing=rows.findIndex(x=>x.slug===r.slug);
+  if(existing>=0){r.id=rows[existing].id;r.createdAt=rows[existing].createdAt;rows[existing]=r}
+  else rows.unshift(r);
+  writeLocal(rows);
+  alert(existing>=0?"QR updated locally.":"QR saved locally.");
+}
+function loadLocalQR(id){
+  const r=readLocal().find(x=>x.id===id);if(!r)return;
+  document.getElementById("name").value=r.name||"";
+  document.getElementById("tag").value=r.tag||"";
+  document.getElementById("category").value=r.category||"";
+  document.getElementById("phone").value=r.phone||"";
+  document.getElementById("website").value=r.website||"";
+  document.getElementById("address").value=r.address||"";
+  document.getElementById("extra").value=r.extra||"";
+  document.getElementById("value").value=r.destination||"";
+  document.getElementById("slug").value=r.slug||"my-business";
+  document.getElementById("size").value=r.size||"a4";
+  document.getElementById("orientation").value=r.orientation||"portrait";
+  document.getElementById("qrColor").value=r.qrColor||"#111827";
+  document.getElementById("accent").value=r.accent||"#2563eb";
+  document.getElementById("cta").value=r.cta||"SCAN TO PAY";
+  document.getElementById("primaryAction").value=r.primaryAction||"upi";
+  logoData=r.logo||"";
+  type=r.qrType||"upi";
+  document.querySelectorAll(".type").forEach(x=>x.classList.remove("active"));
+  const i=TYPES.findIndex(x=>x[0]===type);if(i>=0)document.querySelectorAll(".type")[i].classList.add("active");
+  updateDynamicUrl();sizeChange();render();
+}
+function deleteLocalQR(id){
+  writeLocal(readLocal().filter(x=>x.id!==id));
+}
+function renderLocalList(){
+ const box=document.getElementById("localList");if(!box)return;
+ const rows=readLocal();
+ const total=rows.reduce((n,r)=>n+(Number(r.scans)||0),0);
+ const typesCount=new Set(rows.map(r=>r.qrType)).size;
+ document.getElementById("qrCount").textContent=rows.length;
+ document.getElementById("localStats").innerHTML=`<div class="local-stat"><b>${rows.length}</b><span>Saved QR codes</span></div><div class="local-stat"><b>${total}</b><span>Recorded scans</span></div><div class="local-stat"><b>${typesCount}</b><span>QR types</span></div>`;
+ box.innerHTML=rows.length?rows.map(r=>`<div class="local-item"><div class="meta"><b>${esc(r.name||"Unnamed")}</b><small>${esc(r.slug||"")} · ${esc(r.qrType||"qr")} · ${Number(r.scans||0)} scans</small></div><div class="local-actions"><button class="light" onclick="loadLocalQR('${r.id}')">Open</button><button class="light" onclick="duplicateLocalQR('${r.id}')">Duplicate</button><button class="light" onclick="deleteLocalQR('${r.id}')">Delete</button></div></div>`).join(""):'<div class="note">No saved QR yet.</div>';
+}
+function duplicateLocalQR(id){
+ const r=readLocal().find(x=>x.id===id);if(!r)return;
+ const copy={...r,id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),slug:(r.slug||"business")+"-copy",name:(r.name||"Business")+" Copy",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),scans:0};
+ const rows=readLocal();rows.unshift(copy);writeLocal(rows);
+}
+function exportLocalData(){
+ const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),businesses:readLocal()},null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="qrstandee-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function importLocalData(e){
+ const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+ rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.businesses))throw Error("Invalid backup");
+ const clean=d.businesses.filter(r=>r&&typeof r==="object"&&typeof r.name==="string"&&typeof r.slug==="string").map(r=>({...r,slug:r.slug.toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"").slice(0,80)}));
+ const unique=[];const seen=new Set();for(const r of clean){if(!r.slug||seen.has(r.slug))continue;seen.add(r.slug);unique.push(r)}
+ localStorage.setItem(LOCAL_KEY,JSON.stringify(unique));renderLocalList();alert("Backup restored.")}catch(err){alert("Invalid backup file.")}};
+ rd.readAsText(f);e.target.value="";
+}
+
+// API adapter: same UI can switch to Cloudflare Worker later without changing business logic.
+async function apiRequest(path, options={}){
+ if(!API_BASE) throw new Error("API_BASE is empty: local mode");
+ const res=await fetch(API_BASE+path,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
+ if(!res.ok) throw new Error(await res.text()||("HTTP "+res.status));
+ return res.json();
+}
+async function syncSavedQRsToBackend(){
+ if(!API_BASE)return;
+ for(const row of readLocal()) await apiRequest("/api/qr",{method:"POST",body:JSON.stringify(row)});
+}
+renderLocalList();
+
+sizeChange();render();
+</script>
+</body>
+</html>
