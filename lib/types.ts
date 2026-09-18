@@ -121,3 +121,41 @@ export interface PrivateFeedbackRecord {
   customer_contact?: string;
   created_at: string;
 }
+
+export interface MenuItemRecord {
+  id: string;
+  category_id: string;
+  menu_id: string;
+  name: string;
+  description?: string;
+  price: number;
+  is_veg: boolean;
+  is_bestseller: boolean;
+  is_available: boolean;
+  image_url?: string;
+  sort_order?: number;
+  created_at?: string;
+}
+
+export interface MenuCategoryRecord {
+  id: string;
+  menu_id: string;
+  name: string;
+  sort_order?: number;
+  items?: MenuItemRecord[];
+  created_at?: string;
+}
+
+export interface MenuRecord {
+  id: string;
+  user_id?: string | null;
+  slug: string;
+  name: string;
+  currency: string;
+  banner_url?: string;
+  bio?: string;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+  categories?: MenuCategoryRecord[];
+}

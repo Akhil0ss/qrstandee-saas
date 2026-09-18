@@ -81,7 +81,45 @@ CREATE TABLE IF NOT EXISTS public.private_feedback (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 5. Fast Lookups & Indexes
+-- 5. Digital Menus Tables (Restaurant & Cafe Menu Engine)
+CREATE TABLE IF NOT EXISTS public.menus (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  slug TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  currency TEXT DEFAULT 'INR',
+  banner_url TEXT DEFAULT '',
+  bio TEXT DEFAULT '',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.menu_categories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  menu_id UUID REFERENCES public.menus(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.menu_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  category_id UUID REFERENCES public.menu_categories(id) ON DELETE CASCADE,
+  menu_id UUID REFERENCES public.menus(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+  is_veg BOOLEAN DEFAULT true,
+  is_bestseller BOOLEAN DEFAULT false,
+  is_available BOOLEAN DEFAULT true,
+  image_url TEXT DEFAULT '',
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 6. Fast Lookups & Indexes
 CREATE INDEX IF NOT EXISTS idx_standees_slug ON public.standees(slug);
 CREATE INDEX IF NOT EXISTS idx_standees_user_id ON public.standees(user_id);
 CREATE INDEX IF NOT EXISTS idx_standees_updated_at ON public.standees(updated_at DESC);
@@ -89,12 +127,20 @@ CREATE INDEX IF NOT EXISTS idx_scans_slug ON public.scans(slug);
 CREATE INDEX IF NOT EXISTS idx_scans_created_at ON public.scans(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_scans_standee_id ON public.scans(standee_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_slug ON public.private_feedback(slug);
+CREATE INDEX IF NOT EXISTS idx_menus_user_id ON public.menus(user_id);
+CREATE INDEX IF NOT EXISTS idx_menus_slug ON public.menus(slug);
+CREATE INDEX IF NOT EXISTS idx_menu_categories_menu_id ON public.menu_categories(menu_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_menu_id ON public.menu_items(menu_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_category_id ON public.menu_items(category_id);
 
--- 6. Row Level Security (RLS) & Multi-Tenant Isolation
+-- 7. Row Level Security (RLS) & Multi-Tenant Isolation
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.standees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.scans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.private_feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.menus ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.menu_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.menu_items ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Strict Tenant Access
 DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;

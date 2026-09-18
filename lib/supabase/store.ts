@@ -1,4 +1,11 @@
-import { StandeeRecord, ScanRecord, PrivateFeedbackRecord } from '../types';
+import {
+  StandeeRecord,
+  ScanRecord,
+  PrivateFeedbackRecord,
+  MenuRecord,
+  MenuCategoryRecord,
+  MenuItemRecord,
+} from '../types';
 import { supabase, isSupabaseConfigured } from './client';
 
 const LOCAL_STORAGE_KEY = 'qrstandee_saas_records_v1';
@@ -247,4 +254,219 @@ export async function getPrivateFeedback(slug?: string): Promise<PrivateFeedback
   } catch {
     return [];
   }
+}
+
+// ---------------- Digital Menu Store Engine ----------------
+
+const LOCAL_MENUS_KEY = 'qrstandee_menus_v1';
+
+/**
+ * Fetch all digital menus created by current business
+ */
+export async function getMenus(): Promise<MenuRecord[]> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('menus')
+          .select('*, categories:menu_categories(*, items:menu_items(*))')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) return data as MenuRecord[];
+      }
+    } catch (err) {
+      console.error('Error fetching menus:', err);
+    }
+  }
+
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_MENUS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Public Menu resolver for QR scanners viewing /m/[slug]
+ */
+export async function getMenuBySlug(slug: string): Promise<MenuRecord | null> {
+  const cleanSlug = slug.toLowerCase().trim();
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('menus')
+        .select('*, categories:menu_categories(*, items:menu_items(*))')
+        .eq('slug', cleanSlug)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!error && data) return data as MenuRecord;
+    } catch (err) {
+      console.error('Error fetching public menu:', err);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const list: MenuRecord[] = JSON.parse(localStorage.getItem(LOCAL_MENUS_KEY) || '[]');
+      return list.find((m) => m.slug.toLowerCase() === cleanSlug) || null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Save or update digital menu
+ */
+export async function saveMenu(menu: Partial<MenuRecord>): Promise<{ success: boolean; data?: MenuRecord; error?: string }> {
+  let userId = menu.user_id;
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) userId = user.id;
+
+      const payload = {
+        ...menu,
+        user_id: userId || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from('menus')
+        .upsert(payload, { onConflict: 'slug' })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data: data as MenuRecord };
+    } catch (err: any) {
+      console.error('Error saving menu:', err);
+      return { success: false, error: err.message };
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const list: MenuRecord[] = JSON.parse(localStorage.getItem(LOCAL_MENUS_KEY) || '[]');
+      const newMenu: MenuRecord = {
+        id: menu.id || 'menu-' + Date.now(),
+        user_id: userId || null,
+        slug: menu.slug || 'menu-' + Date.now(),
+        name: menu.name || 'My Menu',
+        currency: menu.currency || 'INR',
+        is_active: menu.is_active ?? true,
+        categories: menu.categories || [],
+        created_at: menu.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      const idx = list.findIndex((m) => m.id === newMenu.id || m.slug === newMenu.slug);
+      if (idx >= 0) list[idx] = newMenu;
+      else list.unshift(newMenu);
+      localStorage.setItem(LOCAL_MENUS_KEY, JSON.stringify(list));
+      return { success: true, data: newMenu };
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  }
+
+  return { success: true };
+}
+
+/**
+ * Delete digital menu
+ */
+export async function deleteMenu(id: string): Promise<boolean> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('menus').delete().eq('id', id);
+    } catch (err) {
+      console.error('Delete menu error:', err);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const list: MenuRecord[] = JSON.parse(localStorage.getItem(LOCAL_MENUS_KEY) || '[]');
+      const filtered = list.filter((m) => m.id !== id);
+      localStorage.setItem(LOCAL_MENUS_KEY, JSON.stringify(filtered));
+    } catch {}
+  }
+  return true;
+}
+
+/**
+ * Add or update a menu category
+ */
+export async function saveMenuCategory(category: Partial<MenuCategoryRecord>): Promise<{ success: boolean; data?: any; error?: string }> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('menu_categories')
+        .upsert(category)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+  return { success: true };
+}
+
+/**
+ * Delete a category
+ */
+export async function deleteMenuCategory(id: string): Promise<boolean> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('menu_categories').delete().eq('id', id);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Add or update a menu item
+ */
+export async function saveMenuItem(item: Partial<MenuItemRecord>): Promise<{ success: boolean; data?: any; error?: string }> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('menu_items')
+        .upsert(item)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+  return { success: true };
+}
+
+/**
+ * Delete a menu item
+ */
+export async function deleteMenuItem(id: string): Promise<boolean> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('menu_items').delete().eq('id', id);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return true;
 }

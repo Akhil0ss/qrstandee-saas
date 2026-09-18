@@ -2,8 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { StandeeRecord, PrivateFeedbackRecord } from '@/lib/types';
-import { getStandees, deleteStandee, saveStandee, getPrivateFeedback } from '@/lib/supabase/store';
+import { StandeeRecord, PrivateFeedbackRecord, MenuRecord } from '@/lib/types';
+import {
+  getStandees,
+  deleteStandee,
+  saveStandee,
+  getPrivateFeedback,
+  getMenus,
+} from '@/lib/supabase/store';
 import { exportHighResPNG, exportStandeeSVG } from '@/lib/export-helpers';
 import { useAuth } from '@/components/AuthProvider';
 import {
@@ -33,18 +39,21 @@ import {
   ArrowRight,
   Building2,
   Loader2,
+  Utensils,
+  Share2,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, profile, isLoading: authLoading } = useAuth();
   const [standees, setStandees] = useState<StandeeRecord[]>([]);
   const [feedbacks, setFeedbacks] = useState<PrivateFeedbackRecord[]>([]);
+  const [menus, setMenus] = useState<MenuRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingDestinationId, setEditingDestinationId] = useState<string | null>(null);
   const [newDestinationValue, setNewDestinationValue] = useState('');
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'standees' | 'feedback' | 'analytics'>('standees');
+  const [activeTab, setActiveTab] = useState<'standees' | 'menus' | 'analytics' | 'feedback'>('standees');
 
   useEffect(() => {
     if (!authLoading) {
@@ -54,9 +63,14 @@ export default function DashboardPage() {
 
   async function loadData() {
     setLoading(true);
-    const [sData, fbData] = await Promise.all([getStandees(), getPrivateFeedback()]);
+    const [sData, fbData, mData] = await Promise.all([
+      getStandees(),
+      getPrivateFeedback(),
+      getMenus(),
+    ]);
     setStandees(sData);
     setFeedbacks(fbData);
+    setMenus(mData);
     setLoading(false);
   }
 
@@ -96,7 +110,7 @@ export default function DashboardPage() {
       s.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Mock Trend Data for Visual Analytics
+  // Trend Data for Visual Analytics
   const trendDays = [
     { day: 'Mon', count: Math.round(totalScans * 0.1) },
     { day: 'Tue', count: Math.round(totalScans * 0.12) },
@@ -109,9 +123,9 @@ export default function DashboardPage() {
   const maxDayCount = Math.max(...trendDays.map((d) => d.count), 10);
 
   const businessName = profile?.business_name || user?.user_metadata?.business_name || 'My Business';
-  const tenantInitial = (businessName?.[0] || user?.email?.[0] || 'T').toUpperCase();
+  const tenantInitial = (businessName?.[0] || user?.email?.[0] || 'B').toUpperCase();
 
-  // If user is not logged in, show tenant access gate
+  // If user is not logged in, show business access gate
   if (!authLoading && !user) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
@@ -119,9 +133,9 @@ export default function DashboardPage() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-xl shadow-blue-500/25">
             <Lock className="h-8 w-8 text-white" />
           </div>
-          <h2 className="mt-5 text-2xl font-black text-white sm:text-3xl">Tenant Access Required</h2>
+          <h2 className="mt-5 text-2xl font-black text-white sm:text-3xl">Business Sign-In Required</h2>
           <p className="mt-2 text-sm text-slate-400">
-            Sign in to access your business command center. Your standees, live analytics, and private customer feedback are strictly isolated to your account.
+            Sign in to access your business command center. Your physical standees, digital food menus, live scan analytics, and private customer feedback are securely protected.
           </p>
 
           <div className="mt-6 flex flex-col gap-3">
@@ -142,7 +156,7 @@ export default function DashboardPage() {
 
           <div className="mt-6 border-t border-slate-800/80 pt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
             <ShieldCheck className="h-4 w-4 text-blue-400" />
-            <span>Supabase PostgreSQL Multi-Tenant RLS Enabled</span>
+            <span>Spotnet Services 100% Secure Business Cloud</span>
           </div>
         </div>
       </div>
@@ -152,28 +166,28 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-950 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        {/* Tenant Welcome Banner */}
+        {/* Business Welcome Banner */}
         {user && (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-blue-500/25 bg-gradient-to-r from-blue-950/40 via-slate-900/80 to-indigo-950/40 p-4 sm:p-5 shadow-lg">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-base font-black text-white shadow-md shadow-blue-600/30">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-blue-500/25 bg-gradient-to-r from-blue-950/40 via-slate-900/80 to-indigo-950/40 p-5 sm:p-6 shadow-xl backdrop-blur-xl">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-lg font-black text-white shadow-md shadow-blue-600/30">
                 {tenantInitial}
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base sm:text-lg font-bold text-white">{businessName}</h2>
+                  <h2 className="text-lg sm:text-xl font-black text-white">{businessName}</h2>
                   <span className="rounded-full border border-blue-400/30 bg-blue-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-300">
-                    {profile?.plan ? `${profile.plan} Plan` : 'Free Plan'}
+                    {profile?.plan ? `${profile.plan} Plan` : 'Pro Active'}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400">
-                  {user.email} • <span className="text-blue-400 font-medium">Tenant Isolated Storage</span>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {user.email} • <span className="text-emerald-400 font-semibold">Spotnet Cloud Verified</span>
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold text-emerald-400">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 Live Cloud Sync Active
               </span>
@@ -181,29 +195,128 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* EYE-CATCHY COLORFUL QUICK ACTION CARDS */}
+        <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Standee Studio */}
+          <Link
+            href="/studio"
+            className="group relative overflow-hidden rounded-3xl border border-blue-500/30 bg-gradient-to-br from-blue-950/60 to-slate-900/90 p-5 shadow-xl transition-all duration-300 hover:border-blue-500/60 hover:-translate-y-1 hover:shadow-blue-500/20"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 group-hover:scale-110 transition-transform">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <span className="text-[10px] font-extrabold uppercase text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-0.5">
+                Print Ready
+              </span>
+            </div>
+            <h3 className="mt-4 font-black text-white text-base group-hover:text-blue-400 transition-colors">
+              Standee Studio
+            </h3>
+            <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+              Design acrylic table tents, counter stands & A4/A5 display cards.
+            </p>
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-blue-400">
+              Create New <ArrowRight className="h-3.5 w-3.5" />
+            </div>
+          </Link>
+
+          {/* Card 2: Digital Food Menu */}
+          <Link
+            href="/dashboard/menu"
+            className="group relative overflow-hidden rounded-3xl border border-orange-500/30 bg-gradient-to-br from-orange-950/50 to-slate-900/90 p-5 shadow-xl transition-all duration-300 hover:border-orange-500/60 hover:-translate-y-1 hover:shadow-orange-500/20"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-600/20 text-orange-400 border border-orange-500/30 group-hover:scale-110 transition-transform">
+                <Utensils className="h-5 w-5" />
+              </div>
+              <span className="text-[10px] font-extrabold uppercase text-orange-400 bg-orange-500/10 border border-orange-500/20 rounded-full px-2 py-0.5">
+                Live Menu
+              </span>
+            </div>
+            <h3 className="mt-4 font-black text-white text-base group-hover:text-orange-400 transition-colors">
+              Digital Menu Engine
+            </h3>
+            <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+              Food catalog with veg/non-veg tags, bestsellers & pricing in ₹ INR.
+            </p>
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-orange-400">
+              Manage Catalog <ArrowRight className="h-3.5 w-3.5" />
+            </div>
+          </Link>
+
+          {/* Card 3: Bulk Table Standees */}
+          <Link
+            href="/bulk"
+            className="group relative overflow-hidden rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-950/50 to-slate-900/90 p-5 shadow-xl transition-all duration-300 hover:border-purple-500/60 hover:-translate-y-1 hover:shadow-purple-500/20"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 group-hover:scale-110 transition-transform">
+                <Layers className="h-5 w-5" />
+              </div>
+              <span className="text-[10px] font-extrabold uppercase text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-0.5">
+                Batch ZIP
+              </span>
+            </div>
+            <h3 className="mt-4 font-black text-white text-base group-hover:text-purple-400 transition-colors">
+              Bulk 50+ Table Tents
+            </h3>
+            <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+              Generate 10 to 50 unique table QR standees in 1 single click.
+            </p>
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-purple-400">
+              Bulk Generator <ArrowRight className="h-3.5 w-3.5" />
+            </div>
+          </Link>
+
+          {/* Card 4: Google Review Booster */}
+          <Link
+            href="/studio?template=google_review_shield"
+            className="group relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/50 to-slate-900/90 p-5 shadow-xl transition-all duration-300 hover:border-amber-500/60 hover:-translate-y-1 hover:shadow-amber-500/20"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-600/20 text-amber-400 border border-amber-500/30 group-hover:scale-110 transition-transform">
+                <Star className="h-5 w-5 fill-amber-400" />
+              </div>
+              <span className="text-[10px] font-extrabold uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5">
+                5★ Booster
+              </span>
+            </div>
+            <h3 className="mt-4 font-black text-white text-base group-hover:text-amber-400 transition-colors">
+              Google Review Shield
+            </h3>
+            <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+              Boost Google Maps rating while keeping 1-3★ feedback private.
+            </p>
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-amber-400">
+              Launch Shield <ArrowRight className="h-3.5 w-3.5" />
+            </div>
+          </Link>
+        </div>
+
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-6">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl flex items-center gap-2.5">
               <LayoutDashboard className="h-7 w-7 text-blue-500" />
-              <span>SaaS Standee Command Center</span>
+              <span>Business Command Center</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Manage dynamic QR codes, change destinations instantly, view private feedback & scan analytics.
+              Manage dynamic QR codes, live food menus, change target URLs instantly & view scan analytics.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <Link
-              href="/bulk"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-all shadow-sm"
+              href="/dashboard/menu"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-2.5 text-xs font-bold text-orange-400 hover:bg-orange-500/20 transition-all"
             >
-              <Layers className="h-4 w-4 text-purple-400" />
-              <span>Bulk Table Standees</span>
+              <Utensils className="h-4 w-4" />
+              <span>Manage Menus</span>
             </Link>
             <Link
               href="/studio"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-600/25 hover:bg-blue-500 transition-all"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-600/25 hover:from-blue-500 hover:to-indigo-500 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>Create Standee</span>
@@ -211,9 +324,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 1. SaaS Metrics Overview */}
+        {/* SaaS Metrics Overview */}
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Total Standees
             </span>
@@ -221,36 +334,36 @@ export default function DashboardPage() {
             <div className="mt-1 text-[11px] text-emerald-400 font-semibold">Active & Live</div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Recorded Scans
+              Recorded Scans
             </span>
             <div className="mt-2 text-2xl sm:text-3xl font-black text-blue-400">{totalScans}</div>
             <div className="mt-1 text-[11px] text-slate-500">Across all counters</div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Avg. Scans / Standee
+              Digital Menus
             </span>
-            <div className="mt-2 text-2xl sm:text-3xl font-black text-purple-400">{avgScans}</div>
-            <div className="mt-1 text-[11px] text-slate-500">Per commercial standee</div>
+            <div className="mt-2 text-2xl sm:text-3xl font-black text-orange-400">{menus.length}</div>
+            <div className="mt-1 text-[11px] text-slate-500">Contactless Catalogs</div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Protected Negative Reviews
+              Shielded Reviews
             </span>
             <div className="mt-2 text-2xl sm:text-3xl font-black text-amber-400">{feedbacks.length}</div>
-            <div className="mt-1 text-[11px] text-emerald-400 font-semibold">Shield Active</div>
+            <div className="mt-1 text-[11px] text-emerald-400 font-semibold">Protected Privately</div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="mt-8 flex border-b border-slate-800 text-xs sm:text-sm font-bold">
+        <div className="mt-8 flex border-b border-slate-800 text-xs sm:text-sm font-bold overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('standees')}
-            className={`flex items-center gap-2 pb-3 px-4 border-b-2 transition-all ${
+            className={`flex items-center gap-2 pb-3 px-4 border-b-2 whitespace-nowrap transition-all ${
               activeTab === 'standees'
                 ? 'border-blue-500 text-blue-400'
                 : 'border-transparent text-slate-400 hover:text-white'
@@ -260,10 +373,21 @@ export default function DashboardPage() {
             <span>Standees ({filteredStandees.length})</span>
           </button>
           <button
+            onClick={() => setActiveTab('menus')}
+            className={`flex items-center gap-2 pb-3 px-4 border-b-2 whitespace-nowrap transition-all ${
+              activeTab === 'menus'
+                ? 'border-orange-500 text-orange-400'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            <Utensils className="h-4 w-4" />
+            <span>Digital Menus ({menus.length})</span>
+          </button>
+          <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-2 pb-3 px-4 border-b-2 transition-all ${
+            className={`flex items-center gap-2 pb-3 px-4 border-b-2 whitespace-nowrap transition-all ${
               activeTab === 'analytics'
-                ? 'border-blue-500 text-blue-400'
+                ? 'border-purple-500 text-purple-400'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -272,14 +396,14 @@ export default function DashboardPage() {
           </button>
           <button
             onClick={() => setActiveTab('feedback')}
-            className={`flex items-center gap-2 pb-3 px-4 border-b-2 transition-all ${
+            className={`flex items-center gap-2 pb-3 px-4 border-b-2 whitespace-nowrap transition-all ${
               activeTab === 'feedback'
-                ? 'border-blue-500 text-blue-400'
+                ? 'border-amber-500 text-amber-400'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             <MessageSquare className="h-4 w-4" />
-            <span>Private Feedback Shield ({feedbacks.length})</span>
+            <span>Private Review Shield ({feedbacks.length})</span>
           </button>
         </div>
 
@@ -307,14 +431,17 @@ export default function DashboardPage() {
                 <RefreshCw className="h-6 w-6 animate-spin text-blue-500" />
               </div>
             ) : filteredStandees.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/40 py-12 text-center">
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-800 bg-slate-900/40 py-12 text-center">
                 <QrCode className="h-10 w-10 text-slate-600 mb-3" />
-                <p className="text-sm font-semibold text-slate-300">No standees found</p>
+                <p className="text-sm font-semibold text-slate-300">No standees created yet</p>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                  Launch the Studio to customize and download your first high-res acrylic standee or table tent.
+                </p>
                 <Link
                   href="/studio"
-                  className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-500"
+                  className="mt-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-600/30"
                 >
-                  Launch Studio
+                  Launch Standee Studio
                 </Link>
               </div>
             ) : (
@@ -327,7 +454,7 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={standee.id}
-                      className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl hover:border-slate-700 transition-all"
+                      className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl hover:border-slate-700 transition-all"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -351,7 +478,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Dynamic Redirect Bar */}
-                      <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-3 space-y-2">
+                      <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950 p-3 space-y-2">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-slate-400">Dynamic URL:</span>
                           <div className="flex items-center gap-1.5">
@@ -401,18 +528,18 @@ export default function DashboardPage() {
                                 type="text"
                                 value={newDestinationValue}
                                 onChange={(e) => setNewDestinationValue(e.target.value)}
-                                className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500"
+                                className="flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500"
                                 placeholder="New URL or destination"
                               />
                               <button
                                 onClick={() => handleQuickUpdateDestination(standee)}
-                                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500"
+                                className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500"
                               >
                                 Save
                               </button>
                               <button
                                 onClick={() => setEditingDestinationId(null)}
-                                className="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-700"
+                                className="rounded-xl border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-700"
                               >
                                 Cancel
                               </button>
@@ -439,19 +566,19 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => exportHighResPNG(standee, dynamicUrl)}
-                            className="rounded-lg border border-slate-800 bg-slate-800/80 px-2.5 py-1.5 font-semibold text-slate-300 hover:text-white transition-all"
+                            className="rounded-xl border border-slate-800 bg-slate-800/80 px-2.5 py-1.5 font-semibold text-slate-300 hover:text-white transition-all"
                           >
-                            Download PNG
+                            PNG
                           </button>
                           <button
                             onClick={() => exportStandeeSVG(standee, dynamicUrl)}
-                            className="rounded-lg border border-slate-800 bg-slate-800/80 px-2.5 py-1.5 font-semibold text-slate-300 hover:text-white transition-all"
+                            className="rounded-xl border border-slate-800 bg-slate-800/80 px-2.5 py-1.5 font-semibold text-slate-300 hover:text-white transition-all"
                           >
                             SVG
                           </button>
                           <button
                             onClick={() => handleDelete(standee.id)}
-                            className="rounded-lg border border-rose-500/20 bg-rose-500/10 p-1.5 text-rose-400 hover:bg-rose-500/20 transition-all"
+                            className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-1.5 text-rose-400 hover:bg-rose-500/20 transition-all"
                             title="Delete Standee"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -466,15 +593,117 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* TAB 2: VISUAL ANALYTICS */}
+        {/* TAB 2: DIGITAL MENUS */}
+        {activeTab === 'menus' && (
+          <div className="mt-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <Utensils className="h-5 w-5 text-orange-400" />
+                  <span>Contactless Digital Food & Drinks Menus</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Menus loaded directly on diners' smartphones upon scanning table standees.
+                </p>
+              </div>
+
+              <Link
+                href="/dashboard/menu"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 text-xs font-black text-slate-950 shadow-md shadow-orange-500/20 hover:brightness-110 transition-all"
+              >
+                <Plus className="h-4 w-4" />
+                Open Menu Studio
+              </Link>
+            </div>
+
+            {menus.length === 0 ? (
+              <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-10 text-center">
+                <Utensils className="mx-auto h-10 w-10 text-orange-400/60 mb-3" />
+                <h3 className="text-base font-bold text-white">No Digital Menus Yet</h3>
+                <p className="mt-1 text-xs text-slate-400 max-w-md mx-auto">
+                  Build your restaurant or cafe menu with dish descriptions, veg/non-veg tags, and prices in ₹ INR.
+                </p>
+                <Link
+                  href="/dashboard/menu"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-blue-500"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Load Sample Menu (1-Click)
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {menus.map((m) => {
+                  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                  const totalItems = (m.categories || []).reduce(
+                    (acc, c) => acc + (c.items?.length || 0),
+                    0
+                  );
+                  return (
+                    <div
+                      key={m.id}
+                      className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl space-y-4 hover:border-slate-700 transition-all"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-base font-bold text-white">{m.name}</h3>
+                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
+                            {m.bio || 'Digital Restaurant Menu'}
+                          </p>
+                        </div>
+                        <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-bold text-orange-400">
+                          {totalItems} Dishes
+                        </span>
+                      </div>
+
+                      <div className="rounded-2xl border border-slate-800 bg-slate-950 p-3 flex items-center justify-between text-xs">
+                        <span className="text-slate-400">Public URL:</span>
+                        <a
+                          href={`/m/${m.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-blue-400 hover:underline flex items-center gap-1"
+                        >
+                          /m/{m.slug}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-slate-800/80 pt-3">
+                        <Link
+                          href="/dashboard/menu"
+                          className="text-xs font-bold text-blue-400 hover:underline flex items-center gap-1"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                          Edit Catalog & Dishes
+                        </Link>
+                        <a
+                          href={`/m/${m.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-xl bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700 flex items-center gap-1"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Preview Mobile View
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: VISUAL ANALYTICS */}
         {activeTab === 'analytics' && (
           <div className="mt-6 space-y-6">
             {totalScans === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/40 py-16 px-4 text-center">
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-800 bg-slate-900/40 py-16 px-4 text-center">
                 <BarChart3 className="h-12 w-12 text-slate-600 mb-3" />
                 <h3 className="text-base font-bold text-white">No Scan Telemetry Recorded Yet</h3>
                 <p className="mt-1 text-xs sm:text-sm text-slate-400 max-w-md">
-                  Once your dynamic QR standees are deployed and scanned by customers, real-time weekly volume, hourly rush patterns, and device breakdowns will appear here.
+                  Once your dynamic QR standees are printed and scanned by customers, real-time weekly volume, hourly rush patterns, and device breakdowns will appear here.
                 </p>
                 <Link
                   href="/studio"
@@ -487,7 +716,7 @@ export default function DashboardPage() {
             ) : (
               <>
                 {/* Weekly Scan Trend Chart */}
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+                <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -511,7 +740,7 @@ export default function DashboardPage() {
                         <div key={d.day} className="flex flex-col items-center gap-2 h-full justify-end">
                           <span className="text-[10px] font-bold text-blue-400">{d.count}</span>
                           <div
-                            className="w-full max-w-[38px] rounded-t-lg bg-gradient-to-t from-blue-700 to-indigo-500 hover:from-blue-600 hover:to-indigo-400 transition-all shadow-md"
+                            className="w-full max-w-[38px] rounded-t-lg bg-gradient-to-t from-blue-700 via-indigo-600 to-purple-500 hover:brightness-110 transition-all shadow-md"
                             style={{ height: `${heightPercent}%` }}
                           />
                           <span className="text-xs text-slate-400 font-semibold">{d.day}</span>
@@ -521,73 +750,73 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-            {/* Device & Location Telemetry */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                  <Smartphone className="h-4 w-4 text-emerald-400" />
-                  <span>Device Breakdown</span>
-                </h3>
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <div className="flex justify-between text-slate-300 mb-1">
-                      <span>Mobile (iOS & Android)</span>
-                      <span className="font-bold text-emerald-400">88%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full w-[88%]" />
+                {/* Device & Location Telemetry */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+                    <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                      <Smartphone className="h-4 w-4 text-emerald-400" />
+                      <span>Device Breakdown</span>
+                    </h3>
+                    <div className="space-y-3 text-xs">
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Mobile (iOS & Android)</span>
+                          <span className="font-bold text-emerald-400">88%</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                          <div className="h-full bg-emerald-500 rounded-full w-[88%]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Desktop</span>
+                          <span className="font-bold text-blue-400">9%</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                          <div className="h-full bg-blue-500 rounded-full w-[9%]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-slate-300 mb-1">
+                          <span>Tablets & Others</span>
+                          <span className="font-bold text-purple-400">3%</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                          <div className="h-full bg-purple-500 rounded-full w-[3%]" />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <div className="flex justify-between text-slate-300 mb-1">
-                      <span>Desktop</span>
-                      <span className="font-bold text-blue-400">9%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
-                      <div className="h-full bg-blue-500 rounded-full w-[9%]" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-slate-300 mb-1">
-                      <span>Tablets & Others</span>
-                      <span className="font-bold text-purple-400">3%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
-                      <div className="h-full bg-purple-500 rounded-full w-[3%]" />
+                  <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+                    <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-purple-400" />
+                      <span>Peak Scanning Hours</span>
+                    </h3>
+                    <div className="space-y-2 text-xs text-slate-300">
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                        <span>Lunch Rush (12:00 PM – 3:30 PM)</span>
+                        <span className="font-bold text-amber-400">42% of traffic</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                        <span>Dinner Peak (7:30 PM – 10:45 PM)</span>
+                        <span className="font-bold text-indigo-400">48% of traffic</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                        <span>Late Night / Off-Hours</span>
+                        <span className="font-bold text-slate-400">10% of traffic</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-purple-400" />
-                  <span>Peak Scanning Hours</span>
-                </h3>
-                <div className="space-y-2 text-xs text-slate-300">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800">
-                    <span>Lunch Rush (12:00 PM – 3:30 PM)</span>
-                    <span className="font-bold text-amber-400">42% of traffic</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800">
-                    <span>Dinner Peak (7:30 PM – 10:45 PM)</span>
-                    <span className="font-bold text-indigo-400">48% of traffic</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800">
-                    <span>Late Night / Off-Hours</span>
-                    <span className="font-bold text-slate-400">10% of traffic</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
+              </>
+            )}
+          </div>
         )}
-      </div>
-    )}
 
-        {/* TAB 3: SMART REVIEW FEEDBACK INBOX */}
+        {/* TAB 4: SMART REVIEW FEEDBACK INBOX */}
         {activeTab === 'feedback' && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-4">
@@ -603,7 +832,7 @@ export default function DashboardPage() {
             </div>
 
             {feedbacks.length === 0 ? (
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-8 text-center">
+              <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 text-center">
                 <ShieldCheck className="mx-auto h-10 w-10 text-emerald-500 mb-2" />
                 <h3 className="text-sm font-bold text-white">Zero Negative Reviews Logged</h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -615,7 +844,7 @@ export default function DashboardPage() {
                 {feedbacks.map((fb) => (
                   <div
                     key={fb.id}
-                    className="rounded-2xl border border-amber-500/20 bg-slate-900/90 p-5 shadow-lg"
+                    className="rounded-3xl border border-amber-500/20 bg-slate-900/90 p-5 shadow-lg"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-1.5">
@@ -636,7 +865,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
 
-                    <p className="mt-3 text-xs sm:text-sm text-slate-200 leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                    <p className="mt-3 text-xs sm:text-sm text-slate-200 leading-relaxed bg-slate-950 p-3 rounded-2xl border border-slate-800/80">
                       "{fb.feedback}"
                     </p>
 

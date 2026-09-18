@@ -37,6 +37,7 @@ function LoginFormContent() {
   const [password, setPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [fullName, setFullName] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // Status states
@@ -73,7 +74,7 @@ function LoginFormContent() {
         }
       }
     } else {
-      // Signup
+      // Signup validations
       if (!businessName.trim()) {
         setErrorMessage('Please enter your Business or Brand name.');
         setSubmitting(false);
@@ -81,6 +82,11 @@ function LoginFormContent() {
       }
       if (password.length < 6) {
         setErrorMessage('Password must be at least 6 characters long.');
+        setSubmitting(false);
+        return;
+      }
+      if (!agreeTerms) {
+        setErrorMessage('Please agree to Spotnet Services Terms of Service and Privacy Policy to continue.');
         setSubmitting(false);
         return;
       }
@@ -93,7 +99,7 @@ function LoginFormContent() {
       if (error) {
         setErrorMessage(error);
       } else if (confirmationRequired) {
-        setSuccessMessage('Account created! Please check your email to confirm your account, then sign in.');
+        setSuccessMessage('Account created successfully! Please check your email to confirm your account, then sign in.');
         setActiveTab('login');
       } else {
         router.push(redirectUrl);
@@ -117,24 +123,28 @@ function LoginFormContent() {
         {/* Brand & Heading */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-2 group">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-xl shadow-blue-500/25 group-hover:scale-105 transition-transform duration-200">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 shadow-xl shadow-blue-500/25 group-hover:scale-105 transition-transform duration-200">
               <QrCode className="h-6 w-6 text-white" />
             </div>
           </Link>
-          <h2 className="mt-4 text-3xl font-black tracking-tight text-white">
-            {activeTab === 'login' ? 'Welcome Back' : 'Create Your Business Tenant'}
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-0.5 text-[11px] font-bold text-blue-400">
+            <Sparkles className="h-3 w-3" />
+            Crafted by Spotnet Services
+          </div>
+          <h2 className="mt-3 text-3xl font-black tracking-tight text-white">
+            {activeTab === 'login' ? 'Welcome Back' : 'Create Your Business Account'}
           </h2>
           <p className="mt-1 text-sm text-slate-400">
             {activeTab === 'login'
-              ? 'Access your isolated dynamic QR standees, feedback, and scan telemetry'
-              : 'Launch your 360° QR Standee studio with isolated tenant storage'}
+              ? 'Access your dynamic standees, digital food menus, and scan analytics'
+              : 'Launch your 360° QR Standee studio and digital menus in seconds'}
           </p>
         </div>
 
         {/* Auth Card */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+        <div className="rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 sm:p-8 backdrop-blur-xl shadow-2xl shadow-blue-950/30">
           {/* Tab Switcher */}
-          <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-slate-950/80 p-1 border border-slate-800">
+          <div className="mb-6 grid grid-cols-2 gap-1 rounded-2xl bg-slate-950/80 p-1 border border-slate-800">
             <button
               type="button"
               onClick={() => {
@@ -142,9 +152,9 @@ function LoginFormContent() {
                 setErrorMessage(null);
                 setSuccessMessage(null);
               }}
-              className={`rounded-lg py-2 text-sm font-bold transition-all ${
+              className={`rounded-xl py-2.5 text-sm font-bold transition-all ${
                 activeTab === 'login'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -158,13 +168,13 @@ function LoginFormContent() {
                 setErrorMessage(null);
                 setSuccessMessage(null);
               }}
-              className={`rounded-lg py-2 text-sm font-bold transition-all ${
+              className={`rounded-xl py-2.5 text-sm font-bold transition-all ${
                 activeTab === 'signup'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Create Account
+              Register Free
             </button>
           </div>
 
@@ -200,7 +210,7 @@ function LoginFormContent() {
                     required
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="e.g. The Brew Corner, Urban Cafe, Apex Clinic"
+                    placeholder="e.g. The Urban Cafe, Sharma Sweets, City Clinic"
                     className="w-full rounded-xl border border-slate-700 bg-slate-950 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
@@ -279,11 +289,36 @@ function LoginFormContent() {
               </div>
             )}
 
+            {/* Legal Terms & Privacy Checkbox (Signup only) */}
+            {activeTab === 'signup' && (
+              <div className="pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={agreeTerms}
+                    onChange={(e) => setAgreeTerms(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-0"
+                  />
+                  <span className="text-xs text-slate-300 leading-relaxed">
+                    I agree to the{' '}
+                    <Link href="/terms" target="_blank" className="text-blue-400 hover:underline font-semibold">
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/privacy" target="_blank" className="text-blue-400 hover:underline font-semibold">
+                      Privacy Policy
+                    </Link>{' '}
+                    issued by Spotnet Services.
+                  </span>
+                </label>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
               disabled={submitting}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/30 hover:from-blue-500 hover:to-indigo-500 transition-all duration-200 disabled:opacity-60"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/30 hover:brightness-110 transition-all duration-200 disabled:opacity-60"
             >
               {submitting ? (
                 <>
@@ -304,7 +339,7 @@ function LoginFormContent() {
                 )
               ) : (
                 <>
-                  <span>Create Tenant Account</span>
+                  <span>Create Business Account</span>
                   <Sparkles className="h-4 w-4" />
                 </>
               )}
@@ -341,10 +376,13 @@ function LoginFormContent() {
           )}
         </div>
 
-        {/* Tenant Isolation Guarantee Badge */}
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-          <ShieldCheck className="h-4 w-4 text-blue-400" />
-          <span>Enterprise Row-Level Security & Tenant Data Isolation Active</span>
+        {/* Spotnet Services Security & Guarantee Badge */}
+        <div className="flex flex-col items-center justify-center gap-1.5 text-center text-xs text-slate-500">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span className="text-slate-400">Enterprise Cloud Security & Data Isolation Active</span>
+          </div>
+          <span>Trusted by 2,500+ Indian restaurants and retail brands</span>
         </div>
       </div>
     </div>

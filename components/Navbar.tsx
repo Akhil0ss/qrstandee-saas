@@ -18,6 +18,8 @@ import {
   Building2,
   ShieldCheck,
   PlusCircle,
+  Utensils,
+  Tag,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -42,8 +44,10 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/studio', label: 'Standee Studio', icon: Sparkles },
+    { href: '/dashboard/menu', label: 'Digital Menu', icon: Utensils },
     { href: '/bulk', label: 'Bulk Tables', icon: Layers },
-    { href: '/dashboard', label: 'Dashboard & Analytics', icon: LayoutDashboard },
+    { href: '/pricing', label: 'Pricing', icon: Tag },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   ];
 
   const handleLogout = async () => {
@@ -54,28 +58,33 @@ export default function Navbar() {
   };
 
   const businessName = profile?.business_name || user?.user_metadata?.business_name || 'My Business';
-  const userInitial = (businessName?.[0] || user?.email?.[0] || 'U').toUpperCase();
+  const userInitial = (businessName?.[0] || user?.email?.[0] || 'B').toUpperCase();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl no-print">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-xl no-print">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        {/* Brand Logo */}
+        {/* Brand Logo & Spotnet Attribution */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
             <QrCode className="h-5 w-5 text-white" />
           </div>
           <div>
-            <span className="text-xl font-black tracking-tight text-white">
-              QR<span className="text-blue-500">Standee</span>
-            </span>
-            <span className="ml-2 hidden rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 sm:inline-block">
-              360° PRO
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xl font-black tracking-tight text-white">
+                QR<span className="text-blue-500">Standee</span>
+              </span>
+              <span className="hidden rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 sm:inline-block">
+                360° PRO
+              </span>
+            </div>
+            <div className="text-[10px] font-semibold text-slate-400 tracking-wide">
+              by <span className="text-slate-300 font-bold">Spotnet Services</span>
+            </div>
           </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1.5">
+        <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -83,9 +92,9 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-all ${
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-bold transition-all ${
                   isActive
-                    ? 'bg-slate-800/90 text-blue-400 border border-slate-700/60 shadow-sm'
+                    ? 'bg-blue-600/15 text-blue-400 border border-blue-500/30 shadow-sm'
                     : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                 }`}
               >
@@ -99,20 +108,20 @@ export default function Navbar() {
         {/* Action / Auth Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {!isLoading && user ? (
-            /* Logged In Tenant Avatar & Dropdown */
+            /* Logged In Business Avatar & Dropdown */
             <div className="relative" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2.5 rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-1.5 text-left text-sm text-white hover:border-slate-600 transition-all shadow-sm"
+                className="flex items-center gap-2.5 rounded-2xl border border-slate-700/80 bg-slate-900/90 px-3 py-1.5 text-left text-sm text-white hover:border-slate-600 transition-all shadow-sm"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-xs font-black text-white">
+                <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-xs font-black text-white">
                   {userInitial}
                 </div>
-                <div className="max-w-[130px] truncate">
+                <div className="max-w-[120px] truncate">
                   <div className="truncate text-xs font-bold leading-tight text-white">{businessName}</div>
-                  <div className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider">
-                    {profile?.plan ? `${profile.plan} Plan` : 'Tenant'}
+                  <div className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">
+                    {profile?.plan ? `${profile.plan} Plan` : 'Pro Active'}
                   </div>
                 </div>
                 <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${userDropdownOpen ? 'rotate-180' : ''}`} />
@@ -124,9 +133,9 @@ export default function Navbar() {
                   <div className="border-b border-slate-800 px-3 py-2.5">
                     <p className="text-xs font-bold text-white truncate">{businessName}</p>
                     <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
-                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400">
+                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
                       <ShieldCheck className="h-3 w-3" />
-                      Isolated Tenant Storage
+                      Spotnet Cloud Active
                     </div>
                   </div>
 
@@ -134,25 +143,33 @@ export default function Navbar() {
                     <Link
                       href="/dashboard"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
                     >
                       <LayoutDashboard className="h-4 w-4 text-blue-400" />
-                      Tenant Dashboard
+                      Business Dashboard
+                    </Link>
+                    <Link
+                      href="/dashboard/menu"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
+                    >
+                      <Utensils className="h-4 w-4 text-orange-400" />
+                      Digital Menu Studio
                     </Link>
                     <Link
                       href="/studio"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
                     >
                       <Sparkles className="h-4 w-4 text-indigo-400" />
-                      Design New Standee
+                      Design Standee
                     </Link>
                     <Link
                       href="/bulk"
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 font-semibold text-slate-200 hover:bg-slate-800 hover:text-white"
                     >
-                      <Layers className="h-4 w-4 text-emerald-400" />
+                      <Layers className="h-4 w-4 text-purple-400" />
                       Bulk Multi-Table Tent
                     </Link>
                   </div>
@@ -161,7 +178,7 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
                       Sign Out
@@ -175,16 +192,16 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-900 hover:text-white transition-all"
+                className="rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-300 hover:bg-slate-900 hover:text-white transition-all"
               >
                 Sign In
               </Link>
               <Link
                 href="/login?tab=signup"
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-600/25 hover:from-blue-500 hover:to-indigo-500 hover:shadow-blue-500/35 transition-all duration-200 hover:-translate-y-0.5"
+                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-4 py-2 text-xs sm:text-sm font-black text-white shadow-lg shadow-blue-600/25 hover:brightness-110 transition-all duration-200"
               >
-                Get Started
-                <ArrowRight className="h-4 w-4" />
+                Register Free
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           )}
@@ -192,7 +209,7 @@ export default function Navbar() {
           {/* Quick Create CTA */}
           <Link
             href="/studio"
-            className="flex items-center gap-1.5 rounded-xl border border-blue-500/40 bg-blue-600/10 px-3.5 py-2 text-sm font-bold text-blue-400 hover:bg-blue-600/20 transition-all"
+            className="flex items-center gap-1.5 rounded-xl border border-blue-500/40 bg-blue-600/10 px-3.5 py-2 text-xs sm:text-sm font-bold text-blue-400 hover:bg-blue-600/20 transition-all"
           >
             <PlusCircle className="h-4 w-4" />
             <span className="hidden lg:inline">Create</span> Standee
@@ -202,7 +219,7 @@ export default function Navbar() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 md:hidden hover:text-white"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-300 md:hidden hover:text-white"
           aria-label="Toggle Navigation Menu"
         >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -214,9 +231,9 @@ export default function Navbar() {
         <div className="border-b border-slate-800 bg-slate-950 px-4 pt-2 pb-6 md:hidden">
           {/* User Info if logged in */}
           {user && (
-            <div className="mb-4 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+            <div className="mb-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-xs font-black text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-xs font-black text-white">
                   {userInitial}
                 </div>
                 <div className="truncate">
@@ -236,9 +253,9 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-semibold ${
+                  className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-bold ${
                     isActive
-                      ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
+                      ? 'bg-blue-600/15 text-blue-400 border border-blue-500/30'
                       : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                   }`}
                 >
@@ -252,7 +269,7 @@ export default function Navbar() {
               <Link
                 href="/studio"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 text-center text-sm font-bold text-white shadow-lg shadow-blue-600/30"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-2.5 text-center text-sm font-bold text-white shadow-lg shadow-blue-600/30"
               >
                 Design New Standee
                 <ArrowRight className="h-4 w-4" />
