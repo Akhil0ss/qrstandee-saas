@@ -23,14 +23,14 @@ import {
 
 export default function BulkGeneratorPage() {
   const { user, profile } = useAuth();
-  const [baseName, setBaseName] = useState(profile?.business_name || 'The Brew Corner');
-  const [baseSlug, setBaseSlug] = useState('brew-corner');
+  const [baseName, setBaseName] = useState(profile?.business_name || '');
+  const [baseSlug, setBaseSlug] = useState('');
   const [tableCount, setTableCount] = useState(10);
   const [tablePrefix, setTablePrefix] = useState('Table');
   const [size, setSize] = useState<StandeeSize>('4x6');
   const [accentColor, setAccentColor] = useState('#2563eb');
-  const [ctaText, setCtaText] = useState('SCAN FOR MENU & UPI PAY');
-  const [destinationPattern, setDestinationPattern] = useState('https://thebrewcorner.com/menu');
+  const [ctaText, setCtaText] = useState('SCAN FOR MENU & SERVICES');
+  const [destinationPattern, setDestinationPattern] = useState('');
 
   const [generatedTables, setGeneratedTables] = useState<StandeeRecord[]>([]);
   const [isGeneratingZip, setIsGeneratingZip] = useState(false);

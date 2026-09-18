@@ -4,107 +4,13 @@ import { supabase, isSupabaseConfigured } from './client';
 const LOCAL_STORAGE_KEY = 'qrstandee_saas_records_v1';
 const LOCAL_FEEDBACK_KEY = 'qrstandee_saas_feedback_v1';
 
-// Default initial standees for demo / offline preview
-const DEFAULT_INITIAL_STANDEES: StandeeRecord[] = [
-  {
-    id: 'demo-1',
-    slug: 'the-brew-corner',
-    name: 'The Brew Corner & Cafe',
-    tagline: 'Artisanal Coffee & Fresh Bakes',
-    category: 'Cafe & Bakery',
-    phone: '+91 98765 43210',
-    website: 'https://instagram.com/thebrewcorner',
-    address: '42 Connaught Place, New Delhi',
-    extra_info: 'GST: 07AAAAA0000A1Z5',
-    destination: 'https://thebrewcorner.com/menu',
-    qr_type: 'multi_action',
-    primary_action: 'multi_action',
-    template_id: 'restaurant_menu',
-    size: 'a4',
-    orientation: 'portrait',
-    qr_color: '#292524',
-    accent_color: '#b45309',
-    cta_text: 'SCAN TO EXPLORE OUR MENU',
-    qr_shape: 'rounded',
-    profile_style: 'luxury',
-    scans_count: 342,
-    last_scan_at: new Date(Date.now() - 3600000 * 3).toISOString(),
-    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-    updated_at: new Date().toISOString(),
-    smart_routing_enabled: true,
-    lunch_url: 'https://thebrewcorner.com/lunch-specials',
-    dinner_url: 'https://thebrewcorner.com/dinner-menu',
-    wifi_ssid: 'BrewCorner_Guest',
-    wifi_password: 'freshcoffee2026',
-    action_links: [
-      { id: '1', title: 'Food & Drinks Menu', url: 'https://thebrewcorner.com/menu', icon: 'menu', badge: 'Popular' },
-      { id: '2', title: 'Pay via UPI', url: 'upi://pay?pa=brewcorner@hdfc&pn=Brew%20Corner', icon: 'upi', badge: 'Instant' },
-      { id: '3', title: 'Connect Guest Wi-Fi', url: '#wifi', icon: 'wifi', badge: 'Free' },
-      { id: '4', title: 'Follow Instagram', url: 'https://instagram.com/thebrewcorner', icon: 'instagram' },
-      { id: '5', title: 'Rate Us on Google', url: '/review/the-brew-corner', icon: 'review', badge: '5 ★' }
-    ]
-  },
-  {
-    id: 'demo-2',
-    slug: 'apex-dental-care',
-    name: 'Apex Dental Care & Clinic',
-    tagline: 'Dr. Sarah Verma (BDS, MDS)',
-    category: 'Healthcare & Clinic',
-    phone: '+91 91234 56789',
-    website: 'https://apexdental.care',
-    address: 'Suite 204, Metro Plaza, Sector 18',
-    extra_info: 'Reg: DL-MED-9942',
-    destination: 'https://g.page/r/example-review/review',
-    qr_type: 'smart_review',
-    primary_action: 'smart_review',
-    template_id: 'google_review',
-    size: '4x6',
-    orientation: 'portrait',
-    qr_color: '#0f172a',
-    accent_color: '#2563eb',
-    cta_text: 'SHARE YOUR CLINIC EXPERIENCE',
-    qr_shape: 'rounded',
-    profile_style: 'clean',
-    scans_count: 89,
-    last_scan_at: new Date(Date.now() - 3600000 * 8).toISOString(),
-    created_at: new Date(Date.now() - 86400000 * 12).toISOString(),
-    updated_at: new Date().toISOString(),
-    smart_review_enabled: true,
-    google_review_url: 'https://g.page/r/example-review/review',
-  },
-  {
-    id: 'demo-3',
-    slug: 'quickpay-counter',
-    name: 'Royal Spices & Dry Fruits',
-    tagline: 'Authentic Kashmiri Spices',
-    category: 'Retail Store',
-    phone: '+91 99887 76655',
-    website: '',
-    address: 'Shop 12, Grand Bazaar',
-    extra_info: 'UPI ID: royalspices@icici',
-    destination: 'upi://pay?pa=royalspices@icici&pn=Royal%20Spices&cu=INR',
-    qr_type: 'upi',
-    primary_action: 'upi',
-    template_id: 'upi_counter',
-    size: 'a5',
-    orientation: 'portrait',
-    qr_color: '#0f172a',
-    accent_color: '#2563eb',
-    cta_text: 'SCAN & PAY WITH ANY UPI APP',
-    qr_shape: 'rounded',
-    profile_style: 'modern',
-    scans_count: 1240,
-    last_scan_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-    created_at: new Date(Date.now() - 86400000 * 28).toISOString(),
-    updated_at: new Date().toISOString(),
-  }
-];
-
 function getLocalStandees(): StandeeRecord[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const list: StandeeRecord[] = JSON.parse(raw);
+    return list.filter((s) => s && !s.id?.startsWith('demo-'));
   } catch {
     return [];
   }
@@ -112,7 +18,7 @@ function getLocalStandees(): StandeeRecord[] {
 
 /**
  * Get all standees belonging strictly to the authenticated tenant.
- * If user is not logged in, returns empty array (or demo items only on client side first-run).
+ * Returns empty array if none exist or if user is not authenticated.
  */
 export async function getStandees(): Promise<StandeeRecord[]> {
   if (isSupabaseConfigured && supabase) {
@@ -132,17 +38,8 @@ export async function getStandees(): Promise<StandeeRecord[]> {
     }
   }
 
-  // Fallback to local storage if offline or not logged in
-  const local = getLocalStandees();
-  if (local.length > 0) return local;
-
-  // On first load if nothing exists, return demo templates
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(DEFAULT_INITIAL_STANDEES));
-    return DEFAULT_INITIAL_STANDEES;
-  }
-
-  return DEFAULT_INITIAL_STANDEES;
+  // Fallback to local storage if offline
+  return getLocalStandees();
 }
 
 /**
@@ -163,10 +60,6 @@ export async function getStandeeBySlug(slug: string): Promise<StandeeRecord | nu
       // Fallback
     }
   }
-
-  // Check demo standees
-  const demo = DEFAULT_INITIAL_STANDEES.find((s) => s.slug.toLowerCase() === cleanSlug);
-  if (demo) return demo;
 
   // Check local storage
   const local = getLocalStandees();

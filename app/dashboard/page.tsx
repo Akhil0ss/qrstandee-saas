@@ -469,40 +469,57 @@ export default function DashboardPage() {
         {/* TAB 2: VISUAL ANALYTICS */}
         {activeTab === 'analytics' && (
           <div className="mt-6 space-y-6">
-            {/* Weekly Scan Trend Chart */}
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-blue-400" />
-                    <span>Weekly Scan Volume Trend</span>
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Live scan frequency across customer tables & checkout counters
-                  </p>
-                </div>
-                <span className="rounded-full bg-blue-500/10 border border-blue-500/30 px-3 py-1 text-xs font-bold text-blue-400">
-                  Last 7 Days
-                </span>
+            {totalScans === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/40 py-16 px-4 text-center">
+                <BarChart3 className="h-12 w-12 text-slate-600 mb-3" />
+                <h3 className="text-base font-bold text-white">No Scan Telemetry Recorded Yet</h3>
+                <p className="mt-1 text-xs sm:text-sm text-slate-400 max-w-md">
+                  Once your dynamic QR standees are deployed and scanned by customers, real-time weekly volume, hourly rush patterns, and device breakdowns will appear here.
+                </p>
+                <Link
+                  href="/studio"
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-blue-500 shadow-md shadow-blue-600/30 transition-all"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create & Deploy Your Standee</span>
+                </Link>
               </div>
-
-              {/* Bar Chart Visualization */}
-              <div className="grid grid-cols-7 gap-2 sm:gap-4 items-end h-44 pt-4 border-b border-slate-800">
-                {trendDays.map((d) => {
-                  const heightPercent = Math.max(12, Math.round((d.count / maxDayCount) * 100));
-                  return (
-                    <div key={d.day} className="flex flex-col items-center gap-2 h-full justify-end">
-                      <span className="text-[10px] font-bold text-blue-400">{d.count}</span>
-                      <div
-                        className="w-full max-w-[38px] rounded-t-lg bg-gradient-to-t from-blue-700 to-indigo-500 hover:from-blue-600 hover:to-indigo-400 transition-all shadow-md"
-                        style={{ height: `${heightPercent}%` }}
-                      />
-                      <span className="text-xs text-slate-400 font-semibold">{d.day}</span>
+            ) : (
+              <>
+                {/* Weekly Scan Trend Chart */}
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-blue-400" />
+                        <span>Weekly Scan Volume Trend</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Live scan frequency across customer tables & checkout counters
+                      </p>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                    <span className="rounded-full bg-blue-500/10 border border-blue-500/30 px-3 py-1 text-xs font-bold text-blue-400">
+                      Last 7 Days
+                    </span>
+                  </div>
+
+                  {/* Bar Chart Visualization */}
+                  <div className="grid grid-cols-7 gap-2 sm:gap-4 items-end h-44 pt-4 border-b border-slate-800">
+                    {trendDays.map((d) => {
+                      const heightPercent = Math.max(12, Math.round((d.count / maxDayCount) * 100));
+                      return (
+                        <div key={d.day} className="flex flex-col items-center gap-2 h-full justify-end">
+                          <span className="text-[10px] font-bold text-blue-400">{d.count}</span>
+                          <div
+                            className="w-full max-w-[38px] rounded-t-lg bg-gradient-to-t from-blue-700 to-indigo-500 hover:from-blue-600 hover:to-indigo-400 transition-all shadow-md"
+                            style={{ height: `${heightPercent}%` }}
+                          />
+                          <span className="text-xs text-slate-400 font-semibold">{d.day}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
 
             {/* Device & Location Telemetry */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -565,8 +582,10 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
+      </div>
+    )}
 
         {/* TAB 3: SMART REVIEW FEEDBACK INBOX */}
         {activeTab === 'feedback' && (
