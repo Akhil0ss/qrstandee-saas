@@ -7,6 +7,7 @@ import { STANDARDS_SIZES } from '@/lib/standee-templates';
 import { generateStyledQR } from '@/lib/qr-engine';
 import { saveBulkStandees } from '@/lib/supabase/store';
 import JSZip from 'jszip';
+import { useAuth } from '@/components/AuthProvider';
 import {
   Layers,
   Download,
@@ -17,10 +18,12 @@ import {
   ArrowRight,
   Utensils,
   Plus,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function BulkGeneratorPage() {
-  const [baseName, setBaseName] = useState('The Brew Corner');
+  const { user, profile } = useAuth();
+  const [baseName, setBaseName] = useState(profile?.business_name || 'The Brew Corner');
   const [baseSlug, setBaseSlug] = useState('brew-corner');
   const [tableCount, setTableCount] = useState(10);
   const [tablePrefix, setTablePrefix] = useState('Table');
@@ -32,6 +35,14 @@ export default function BulkGeneratorPage() {
   const [generatedTables, setGeneratedTables] = useState<StandeeRecord[]>([]);
   const [isGeneratingZip, setIsGeneratingZip] = useState(false);
   const [zipProgress, setZipProgress] = useState(0);
+
+  React.useEffect(() => {
+    if (profile?.business_name) {
+      setBaseName(profile.business_name);
+      const slug = profile.business_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      setBaseSlug(slug);
+    }
+  }, [profile]);
 
   function handleGenerate() {
     const list: StandeeRecord[] = [];

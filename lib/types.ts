@@ -35,6 +35,16 @@ export interface ActionLinkItem {
   badge?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name?: string;
+  business_name?: string;
+  plan: 'free' | 'pro' | 'enterprise';
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface StandeeRecord {
   id: string;
   user_id?: string | null;

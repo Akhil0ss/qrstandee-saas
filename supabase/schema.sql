@@ -90,45 +90,122 @@ CREATE INDEX IF NOT EXISTS idx_scans_created_at ON public.scans(created_at DESC)
 CREATE INDEX IF NOT EXISTS idx_scans_standee_id ON public.scans(standee_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_slug ON public.private_feedback(slug);
 
--- 6. Row Level Security (RLS)
+-- 6. Row Level Security (RLS) & Multi-Tenant Isolation
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.standees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.scans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.private_feedback ENABLE ROW LEVEL SECURITY;
 
--- Profiles
-CREATE POLICY "Users can view own profile" ON public.profiles
-  FOR SELECT USING (auth.uid() = id);
+-- Profiles: Strict Tenant Access
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Tenants can view own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Tenants can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Tenants can insert own profile" ON public.profiles;
 
-CREATE POLICY "Users can update own profile" ON public.profiles
-  FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Tenants can view own profile" ON public.profiles
+  FOR SELECT TO authenticated
+  USING (auth.uid() = id);
 
--- Standees
+CREATE POLICY "Tenants can update own profile" ON public.profiles
+  FOR UPDATE TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Tenants can insert own profile" ON public.profiles
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = id);
+
+-- Standees: Strict Tenant Isolation
+DROP POLICY IF EXISTS "Public can view standee by slug" ON public.standees;
+DROP POLICY IF EXISTS "Users can insert standees" ON public.standees;
+DROP POLICY IF EXISTS "Users can update own standees" ON public.standees;
+DROP POLICY IF EXISTS "Users can delete own standees" ON public.standees;
+DROP POLICY IF EXISTS "Tenants can insert standees" ON public.standees;
+DROP POLICY IF EXISTS "Tenants can update standees" ON public.standees;
+DROP POLICY IF EXISTS "Tenants can delete standees" ON public.standees;
+
+-- Allow public read of standees by slug (necessary for QR scans and dynamic redirect routes)
 CREATE POLICY "Public can view standee by slug" ON public.standees
   FOR SELECT USING (true);
 
-CREATE POLICY "Users can insert standees" ON public.standees
-  FOR INSERT WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
+-- Authenticated tenants can insert their own standees
+CREATE POLICY "Tenants can insert standees" ON public.standees
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own standees" ON public.standees
-  FOR UPDATE USING (auth.uid() = user_id OR user_id IS NULL);
+-- Authenticated tenants can update ONLY their own standees
+CREATE POLICY "Tenants can update standees" ON public.standees
+  FOR UPDATE TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete own standees" ON public.standees
-  FOR DELETE USING (auth.uid() = user_id OR user_id IS NULL);
+-- Authenticated tenants can delete ONLY their own standees
+CREATE POLICY "Tenants can delete standees" ON public.standees
+  FOR DELETE TO authenticated
+  USING (auth.uid() = user_id);
 
--- Scans
-CREATE POLICY "Edge can insert scans" ON public.scans
+-- Scans: Strict Tenant Analytics Isolation
+DROP POLICY IF EXISTS "Edge can insert scans" ON public.scans;
+DROP POLICY IF EXISTS "Users can view scans of own standees" ON public.scans;
+DROP POLICY IF EXISTS "Anyone can insert scans" ON public.scans;
+DROP POLICY IF EXISTS "Tenants can view own scans" ON public.scans;
+
+CREATE POLICY "Anyone can insert scans" ON public.scans
   FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Users can view scans of own standees" ON public.scans
-  FOR SELECT USING (true);
+CREATE POLICY "Tenants can view own scans" ON public.scans
+  FOR SELECT TO authenticated
+  USING (
+    slug IN (
+      SELECT s.slug FROM public.standees s WHERE s.user_id = auth.uid()
+    )
+  );
 
--- Private Feedback
+-- Private Feedback: Strict Tenant Shield Isolation
+DROP POLICY IF EXISTS "Anyone can insert private feedback" ON public.private_feedback;
+DROP POLICY IF EXISTS "Users can read feedback" ON public.private_feedback;
+DROP POLICY IF EXISTS "Tenants can read own feedback" ON public.private_feedback;
+
 CREATE POLICY "Anyone can insert private feedback" ON public.private_feedback
   FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Users can read feedback" ON public.private_feedback
-  FOR SELECT USING (true);
+CREATE POLICY "Tenants can read own feedback" ON public.private_feedback
+  FOR SELECT TO authenticated
+  USING (
+    slug IN (
+      SELECT s.slug FROM public.standees s WHERE s.user_id = auth.uid()
+    )
+  );
+
+-- 7. Triggers
+
+-- Auto-create profile upon auth.users signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, business_name, plan)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.email, ''),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    COALESCE(NEW.raw_user_meta_data->>'business_name', 'My Business'),
+    'free'
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET
+    email = EXCLUDED.email,
+    full_name = CASE WHEN EXCLUDED.full_name <> '' THEN EXCLUDED.full_name ELSE public.profiles.full_name END,
+    business_name = CASE WHEN EXCLUDED.business_name <> '' THEN EXCLUDED.business_name ELSE public.profiles.business_name END,
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT OR UPDATE ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Auto-update updated_at timestamp trigger
 CREATE OR REPLACE FUNCTION public.handle_updated_at()

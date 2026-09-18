@@ -14,6 +14,10 @@ import {
   Layers,
   Palette,
   ExternalLink,
+  Clock,
+  Lock,
+  Building2,
+  TrendingUp,
 } from 'lucide-react';
 import { TEMPLATES } from '@/lib/standee-templates';
 
@@ -30,7 +34,7 @@ export default function HomePage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold text-blue-400 backdrop-blur-md shadow-sm">
             <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-            <span>Next-Gen Business Standee & Dynamic QR SaaS</span>
+            <span>Next-Gen Multi-Tenant Standee & Dynamic QR SaaS</span>
           </div>
 
           {/* Headline */}
@@ -42,7 +46,7 @@ export default function HomePage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-slate-300 leading-relaxed">
-            Create ultra-high-resolution, print-ready acrylic counter standees and table tents in seconds. Powered by dynamic redirect URLs and real-time scan analytics.
+            Create ultra-high-resolution, print-ready acrylic counter standees, table tents, and review shields in seconds. Powered by isolated multi-tenant vaults, dynamic redirect URLs, and real-time scan telemetry.
           </p>
 
           {/* Action Buttons */}
@@ -59,7 +63,7 @@ export default function HomePage() {
               className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/90 px-6 py-3.5 text-base font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition-all shadow-sm"
             >
               <BarChart3 className="h-5 w-5 text-blue-400" />
-              Live Dashboard Demo
+              Tenant Dashboard
             </Link>
           </div>
 
@@ -75,11 +79,11 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              <span>Supabase Database Ready</span>
+              <span>Multi-Tenant RLS Isolated</span>
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              <span>Vercel 1-Click Deploy</span>
+              <span>Bulk 50+ Table Generator</span>
             </div>
           </div>
         </div>
@@ -89,14 +93,14 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Left: Mini Standee Visual */}
             <div className="w-full md:w-1/2 flex justify-center">
-              <div className="w-64 rounded-xl border-4 border-slate-700 bg-white p-6 text-center text-slate-900 shadow-2xl">
+              <div className="w-64 rounded-2xl border-4 border-slate-700 bg-white p-6 text-center text-slate-900 shadow-2xl">
                 <div className="mx-auto h-2 w-12 rounded-full bg-blue-600 mb-4" />
                 <h3 className="text-xl font-black">The Gourmet Bistro</h3>
                 <p className="text-xs text-slate-500 mt-1">Scan to Explore Our Menu</p>
-                <div className="my-4 mx-auto flex h-36 w-36 items-center justify-center rounded-lg border-2 border-slate-200 bg-slate-50 p-2 shadow-inner">
+                <div className="my-4 mx-auto flex h-36 w-36 items-center justify-center rounded-xl border-2 border-slate-200 bg-slate-50 p-2 shadow-inner">
                   <QrCode className="h-28 w-28 text-slate-900" />
                 </div>
-                <div className="rounded-full bg-blue-600 py-1.5 px-3 text-[11px] font-extrabold text-white">
+                <div className="rounded-full bg-blue-600 py-1.5 px-3 text-[11px] font-extrabold text-white shadow-md">
                   SCAN FOR DIGITAL MENU
                 </div>
                 <p className="mt-3 text-[10px] text-slate-400">table-12.bistro.app</p>
@@ -112,12 +116,12 @@ export default function HomePage() {
                 Never waste money reprinting damaged acrylic standees
               </h2>
               <p className="text-sm text-slate-300 leading-relaxed">
-                When you switch from your summer menu to winter specials, or update your payment QR / Google review link, you don't throw away your physical hardware. Just change the destination in your dashboard in 3 seconds.
+                When you switch from your summer menu to winter specials, or update your payment UPI ID / Google review link, you don't throw away your physical acrylic hardware. Just change the destination in your dashboard in 3 seconds.
               </p>
               <div className="space-y-2 pt-2 text-sm text-slate-200">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-blue-400" />
-                  <span>Real-time scan counter and device telemetry</span>
+                  <span>Real-time scan counter, peak hours, and device telemetry</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-blue-400" />
@@ -141,7 +145,92 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. TEMPLATES SHOWCASE */}
+      {/* 2. 360° PRO FEATURE SUITE */}
+      <section className="border-t border-slate-800/80 bg-slate-900/30 px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-indigo-400">
+              <Zap className="h-3.5 w-3.5" /> 360° Enterprise Pro Upgrades
+            </span>
+            <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
+              Engineered to Outperform Every Ordinary QR Generator
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-slate-400 text-sm sm:text-base">
+              Built specifically for modern restaurants, clinics, retail counters, and corporate salons.
+            </p>
+          </div>
+
+          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Feature 1: Smart Review Shield */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl transition-all duration-300 hover:border-blue-500/40 hover:-translate-y-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <Star className="h-6 w-6 fill-amber-400" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-white">Smart Review Shield</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                4-5★ happy customers are redirected straight to your Google Maps review page with celebratory confetti. 1-3★ unhappy feedback is privately sent to your dashboard so you can fix issues before they go public.
+              </p>
+            </div>
+
+            {/* Feature 2: Multi-Action Table Tent */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl transition-all duration-300 hover:border-indigo-500/40 hover:-translate-y-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <Layers className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-white">Multi-Action Concierge Card</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Transform any table tent into a 5-in-1 hospitality concierge: Food & drinks menu, 1-tap UPI instant payments, 1-click Wi-Fi password copy, Google review link, and manager call.
+              </p>
+            </div>
+
+            {/* Feature 3: Bulk Table Generator */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl transition-all duration-300 hover:border-purple-500/40 hover:-translate-y-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                <Printer className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-white">Bulk 50+ Table Generator</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Generate 10 to 50 table standees in 1 single click. Each table gets its own unique dynamic tracking slug, ready for high-speed batch ZIP download.
+              </p>
+            </div>
+
+            {/* Feature 4: Time-Based Smart Routing */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl transition-all duration-300 hover:border-emerald-500/40 hover:-translate-y-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Clock className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-white">Time-Based Smart Routing</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Automatically show Lunch specials from 11 AM to 4 PM, and seamlessly switch to Dinner menu from 4 PM to 11 PM. Zero manual QR code editing needed.
+              </p>
+            </div>
+
+            {/* Feature 5: Multi-Tenant Enterprise Isolation */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl transition-all duration-300 hover:border-blue-500/40 hover:-translate-y-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <Lock className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-white">Strict Multi-Tenant Isolation</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Hardened with PostgreSQL Row-Level Security (RLS). Every business tenant has a protected vault — no tenant can ever see, modify, or leak another business’s standees, scans, or private customer feedback.
+              </p>
+            </div>
+
+            {/* Feature 6: Real-Time Analytics & Feedback Inbox */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl transition-all duration-300 hover:border-pink-500/40 hover:-translate-y-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                <TrendingUp className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-white">Live Telemetry & Feedback Inbox</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Track hourly peak traffic, mobile vs desktop breakdown, and total scan volume across all counters. Respond directly to private customer reviews.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. TEMPLATES SHOWCASE */}
       <section className="border-t border-slate-800/80 bg-slate-900/40 px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
@@ -189,62 +278,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. HOW IT WORKS */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-              From Concept to Counter in 4 Steps
-            </h2>
-            <p className="mt-3 text-slate-400 text-sm">
-              The modern streamlined workflow built for local commerce.
-            </p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600/10 text-blue-400 text-lg font-black border border-blue-500/20">
-                1
-              </div>
-              <h3 className="mt-4 text-base font-bold text-white">Pick Size & Action</h3>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Choose A4, A5, acrylic table tent, or promo board. Set UPI, Menu, Review, or Website.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-400 text-lg font-black border border-indigo-500/20">
-                2
-              </div>
-              <h3 className="mt-4 text-base font-bold text-white">Add Brand Logo</h3>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Embed your company logo in the center of the QR with automatic 30% error-correction recovery.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600/10 text-purple-400 text-lg font-black border border-purple-500/20">
-                3
-              </div>
-              <h3 className="mt-4 text-base font-bold text-white">Export 300 DPI</h3>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Download print-ready PNG, vector SVG, or hit Print for instant printer calibration.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600/10 text-emerald-400 text-lg font-black border border-emerald-500/20">
-                4
-              </div>
-              <h3 className="mt-4 text-base font-bold text-white">Dynamic Control</h3>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Change your QR target destination in your dashboard without touching the printed standee.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* 4. CALL TO ACTION BANNER */}
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 p-8 sm:p-12 text-center shadow-2xl relative">
@@ -253,7 +286,7 @@ export default function HomePage() {
               Ready to create your high-converting standees?
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-blue-100 text-sm sm:text-base">
-              Start in Studio right now. Works 100% locally during testing, and syncs automatically with Vercel and Supabase in production.
+              Start in Studio right now. Create your isolated business account for cloud sync, or design offline instantly.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -263,10 +296,10 @@ export default function HomePage() {
                 Open Standee Studio
               </Link>
               <Link
-                href="/dashboard"
+                href="/login?tab=signup"
                 className="w-full sm:w-auto rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-base font-bold text-white hover:bg-white/20 transition-colors"
               >
-                View Analytics Dashboard
+                Create Business Account
               </Link>
             </div>
           </div>

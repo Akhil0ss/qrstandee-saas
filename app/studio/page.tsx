@@ -13,6 +13,7 @@ import { TEMPLATES, STANDARDS_SIZES } from '@/lib/standee-templates';
 import { generateStyledQR } from '@/lib/qr-engine';
 import { exportHighResPNG, exportStandeeSVG } from '@/lib/export-helpers';
 import { saveStandee, getStandeeBySlug } from '@/lib/supabase/store';
+import { useAuth } from '@/components/AuthProvider';
 import {
   Sparkles,
   Printer,
@@ -53,6 +54,9 @@ const QR_ACTION_TYPES: { id: QRType; label: string; icon: any; defaultPlaceholde
 ];
 
 export default function StudioPage() {
+  const { user, profile } = useAuth();
+  const businessName = profile?.business_name || user?.user_metadata?.business_name;
+
   // Mobile Tab State: 'editor' or 'preview'
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
 
@@ -60,7 +64,7 @@ export default function StudioPage() {
   const [standee, setStandee] = useState<StandeeRecord>({
     id: 'standee-' + Date.now(),
     slug: 'my-business',
-    name: 'Your Business Name',
+    name: businessName || 'Your Business Name',
     tagline: 'Scan to connect with us',
     category: 'Restaurant & Cafe',
     phone: '+91 98765 43210',
@@ -217,18 +221,24 @@ export default function StudioPage() {
           </div>
 
           {/* Action Toolbar */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {user ? (
+              <span className="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="max-w-[130px] truncate">{businessName || 'Tenant'}</span> Vault
+              </span>
+            ) : null}
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-500 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 hover:from-blue-500 hover:to-indigo-500 transition-all disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" />
               <span>{isSaving ? 'Saving...' : 'Save Design'}</span>
             </button>
             <button
               onClick={() => window.print()}
-              className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-all"
+              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-all"
             >
               <Printer className="h-3.5 w-3.5" />
               <span>Print</span>

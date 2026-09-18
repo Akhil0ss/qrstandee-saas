@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { StandeeRecord, PrivateFeedbackRecord } from '@/lib/types';
 import { getStandees, deleteStandee, saveStandee, getPrivateFeedback } from '@/lib/supabase/store';
 import { exportHighResPNG, exportStandeeSVG } from '@/lib/export-helpers';
+import { useAuth } from '@/components/AuthProvider';
 import {
   LayoutDashboard,
   QrCode,
@@ -28,9 +29,14 @@ import {
   ShieldCheck,
   SmartphoneNfc,
   TrendingUp,
+  Lock,
+  ArrowRight,
+  Building2,
+  Loader2,
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { user, profile, isLoading: authLoading } = useAuth();
   const [standees, setStandees] = useState<StandeeRecord[]>([]);
   const [feedbacks, setFeedbacks] = useState<PrivateFeedbackRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,8 +47,10 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'standees' | 'feedback' | 'analytics'>('standees');
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!authLoading) {
+      loadData();
+    }
+  }, [authLoading, user]);
 
   async function loadData() {
     setLoading(true);
@@ -100,9 +108,79 @@ export default function DashboardPage() {
   ];
   const maxDayCount = Math.max(...trendDays.map((d) => d.count), 10);
 
+  const businessName = profile?.business_name || user?.user_metadata?.business_name || 'My Business';
+  const tenantInitial = (businessName?.[0] || user?.email?.[0] || 'T').toUpperCase();
+
+  // If user is not logged in, show tenant access gate
+  if (!authLoading && !user) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900/80 p-8 text-center backdrop-blur-xl shadow-2xl">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-xl shadow-blue-500/25">
+            <Lock className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="mt-5 text-2xl font-black text-white sm:text-3xl">Tenant Access Required</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Sign in to access your business command center. Your standees, live analytics, and private customer feedback are strictly isolated to your account.
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3">
+            <Link
+              href="/login?redirect=/dashboard"
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/30 hover:from-blue-500 hover:to-indigo-500 transition-all"
+            >
+              <span>Sign In to Dashboard</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/login?tab=signup&redirect=/dashboard"
+              className="rounded-xl border border-slate-700 bg-slate-950 py-3 text-sm font-bold text-slate-300 hover:bg-slate-900 hover:text-white transition-all"
+            >
+              Create New Business Account
+            </Link>
+          </div>
+
+          <div className="mt-6 border-t border-slate-800/80 pt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
+            <ShieldCheck className="h-4 w-4 text-blue-400" />
+            <span>Supabase PostgreSQL Multi-Tenant RLS Enabled</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
+        {/* Tenant Welcome Banner */}
+        {user && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-blue-500/25 bg-gradient-to-r from-blue-950/40 via-slate-900/80 to-indigo-950/40 p-4 sm:p-5 shadow-lg">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-base font-black text-white shadow-md shadow-blue-600/30">
+                {tenantInitial}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-bold text-white">{businessName}</h2>
+                  <span className="rounded-full border border-blue-400/30 bg-blue-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-300">
+                    {profile?.plan ? `${profile.plan} Plan` : 'Free Plan'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {user.email} • <span className="text-blue-400 font-medium">Tenant Isolated Storage</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                Live Cloud Sync Active
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

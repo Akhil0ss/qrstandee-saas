@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { AuthProvider } from '@/components/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'QRStandee — Professional QR Standee Studio & Dynamic Redirect SaaS',
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="flex min-h-screen flex-col bg-slate-950 text-slate-100 antialiased selection:bg-blue-600 selection:text-white">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
