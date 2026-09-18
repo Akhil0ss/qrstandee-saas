@@ -19,10 +19,11 @@ import {
   Utensils,
   Plus,
   ShieldCheck,
+  Lock,
 } from 'lucide-react';
 
 export default function BulkGeneratorPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading: authLoading } = useAuth();
   const [baseName, setBaseName] = useState(profile?.business_name || '');
   const [baseSlug, setBaseSlug] = useState('');
   const [tableCount, setTableCount] = useState(10);
@@ -109,8 +110,53 @@ export default function BulkGeneratorPage() {
     link.href = URL.createObjectURL(content);
     link.download = `${baseSlug}-tables-pack.zip`;
     link.click();
-
     setIsGeneratingZip(false);
+  }
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-[85vh] items-center justify-center bg-slate-950 px-4 py-12">
+        <div className="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900/80 p-8 text-center backdrop-blur-xl shadow-2xl">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-xl shadow-purple-500/25">
+            <Lock className="h-8 w-8 text-white" />
+          </div>
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs font-bold text-purple-400">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Spotnet Services Cloud
+          </div>
+          <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
+            Business Account Required
+          </h2>
+          <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+            Please sign in or create an account to generate bulk multi-table standees. All generated table slugs, dynamic routing URLs, and download packages are linked to your business.
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3">
+            <Link
+              href="/login?tab=signup&redirect=/bulk"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 py-3.5 text-sm font-black text-white shadow-xl shadow-purple-600/30 hover:brightness-110 transition-all"
+            >
+              <span>Create Free Business Account</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/login?redirect=/bulk"
+              className="rounded-2xl border border-slate-700 bg-slate-950 py-3 text-sm font-bold text-slate-300 hover:bg-slate-900 hover:text-white transition-all"
+            >
+              Already have an account? Sign In
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

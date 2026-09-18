@@ -42,6 +42,8 @@ import {
   Copy,
   ChevronRight,
   ShieldCheck,
+  Lock,
+  ArrowRight,
 } from 'lucide-react';
 
 const SAMPLE_STARTER_MENU = {
@@ -372,6 +374,52 @@ export default function MenuDashboardPage() {
     navigator.clipboard?.writeText(url);
     setCopiedUrl(true);
     setTimeout(() => setCopiedUrl(false), 2500);
+  }
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-[85vh] items-center justify-center bg-slate-950 px-4 py-12">
+        <div className="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900/80 p-8 text-center backdrop-blur-xl shadow-2xl">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-600 shadow-xl shadow-orange-500/25">
+            <Lock className="h-8 w-8 text-white" />
+          </div>
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-400">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Spotnet Services Cloud
+          </div>
+          <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
+            Business Account Required
+          </h2>
+          <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+            Please sign in or register your business account to manage your restaurant's digital menus, edit dishes, update prices, and view live QR orders.
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3">
+            <Link
+              href="/login?tab=signup&redirect=/dashboard/menu"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 py-3.5 text-sm font-black text-slate-950 shadow-xl shadow-orange-500/30 hover:brightness-110 transition-all"
+            >
+              <span>Create Free Business Account</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/login?redirect=/dashboard/menu"
+              className="rounded-2xl border border-slate-700 bg-slate-950 py-3 text-sm font-bold text-slate-300 hover:bg-slate-900 hover:text-white transition-all"
+            >
+              Already have an account? Sign In
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
