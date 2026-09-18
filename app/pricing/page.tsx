@@ -145,9 +145,9 @@ export default function PricingPage() {
             <span>Honest, Transparent & Ultra-Competitive Indian Pricing</span>
           </div>
 
-          <h1 className="mt-5 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white">
-            Supercharge Your Counters.{' '}
-            <span className="block bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="mt-5 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.2] sm:leading-[1.18] lg:leading-[1.15]">
+            <span>Supercharge Your Counters.</span>
+            <span className="mt-2.5 block bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent pb-1">
               Never Waste Money on Reprints.
             </span>
           </h1>

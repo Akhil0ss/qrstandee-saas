@@ -37,15 +37,15 @@ export default function HomePage() {
 
         <div className="relative mx-auto max-w-5xl text-center">
           {/* Creator & Trust Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-bold text-blue-400 backdrop-blur-md shadow-lg shadow-blue-500/10">
-            <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-            <span>Engineered by Spotnet Services • India's #1 Dynamic Standee SaaS</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-bold text-blue-400 backdrop-blur-md shadow-lg shadow-blue-500/10 max-w-full">
+            <Sparkles className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+            <span className="truncate">Spotnet Services • Dynamic QR Standee Platform</span>
           </div>
 
-          {/* Headline */}
-          <h1 className="mt-6 text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl leading-tight">
-            Print High-Converting Standees.{' '}
-            <span className="block bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+          {/* Headline - Generous Line Height & Safe Margins */}
+          <h1 className="mt-6 text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight text-white leading-[1.2] sm:leading-[1.18] lg:leading-[1.15]">
+            <span>Print High-Converting Standees.</span>
+            <span className="mt-3 block bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent pb-1">
               Update Destinations Anytime Without Reprints.
             </span>
           </h1>
